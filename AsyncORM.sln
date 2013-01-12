@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM", "AsyncORM\AsyncORM.csproj", "{2E919595-F915-4B8F-ABC9-24B65CA82CE5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM.UnitTests", "AsyncORM.UnitTests\AsyncORM.UnitTests.csproj", "{0C8E25CD-9904-4A97-806D-56745B2083E5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{2E919595-F915-4B8F-ABC9-24B65CA82CE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E919595-F915-4B8F-ABC9-24B65CA82CE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2E919595-F915-4B8F-ABC9-24B65CA82CE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
