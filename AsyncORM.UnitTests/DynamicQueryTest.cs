@@ -56,5 +56,6 @@ namespace AsyncORM.UnitTests
             var departments = result.Select(x => new {DepartmentId = x.DepartmentID, DeptName = x.Name});
             Assert.IsTrue(departments.Any());
         }
+       
     }
 }
