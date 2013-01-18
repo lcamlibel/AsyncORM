@@ -40,9 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BaseDatabaseAsync.cs" />
+    <Compile Include="BatchSetting.cs" />
     <Compile Include="DataReaderAsyncExtensions.cs" />
     <Compile Include="BulkCopyDestinationSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
+    <Compile Include="interfaces\IBatchSetting.cs" />
     <Compile Include="interfaces\IBulkCopyDestinationSetting.cs" />
     <Compile Include="interfaces\IQueryAsync.cs" />
     <Compile Include="interfaces\IBulkCopySourceSetting.cs" />

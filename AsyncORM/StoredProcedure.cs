@@ -119,7 +119,37 @@ namespace AsyncORM
                 }
             }
         }
-
+        public async Task ExecuteNonQueryAsync(IEnumerable<IBatchSetting> batchSettings,
+                                             IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+                                             int commandTimeout = 30)
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                await conn.OpenAsync();
+                using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
+                {
+                    try
+                    {
+                        foreach (var setting in batchSettings)
+                        {
+                            using (SqlCommand comm = conn.CreateCommand())
+                            {
+                                await
+                                    SetupCommandAsync(trans, CommandType.StoredProcedure, setting.CommandText,
+                                                      commandTimeout, comm, setting.DbParams);
+                                await comm.ExecuteNonQueryAsync();
+                            }
+                        }
+                        trans.Commit();
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
         public async Task<object> ExecuteScalarAsync(string storedProcedure,
                                                      object dbParams = null,
                                                      IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,

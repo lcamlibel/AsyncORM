@@ -22,6 +22,10 @@ namespace AsyncORM.interfaces
                                   object dbParams = null, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                   int commandTimeout = 30);
 
+        Task ExecuteNonQueryAsync(IEnumerable<IBatchSetting> batchSettings,
+                                  IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+                                  int commandTimeout = 30);
+
         Task<object> ExecuteScalarAsync(string commandText,
                                         object dbParams = null,
                                         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
