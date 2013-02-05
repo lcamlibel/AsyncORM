@@ -1,4 +1,4 @@
-Async ORM
+Async Micro ORM
 ========
 A very lightweight dynamic asynchronous data access for .NET, written in C#. 
 
@@ -15,8 +15,30 @@ AsyncORM allows developers  to develop asynchronous data access without dealing 
 How to use it?
 =====================
 you have two classes to work with database, StoredProcedure and DynamicQuery, which both implement IQueryAsync interface.
- string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
-<code>
- IQueryAsync storedProcedure = new StoredProcedure(connString);
-IEnumerable<dynamic> result =await storedProcedure.ExecuteAsync("proc_test2");
-</code>
+
+Call Stored Procedure without parameters
+=====================
+ 	string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;	
+	 IQueryAsync storedProcedure = new StoredProcedure(connString);	
+	IEnumerable<dynamic> result =await storedProcedure.ExecuteAsync("proc_test2");
+
+Call Stored Procedure with parameters
+=====================
+the names of properties of the object are the same with the parameters of stored procedure
+ 
+	string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;	
+	 IQueryAsync storedProcedure = new StoredProcedure(connString);	
+	IEnumerable<dynamic> result =await storedProcedure.ExecuteAsync("proc_Login", new {UserName="BillGates",Password="WinRT"});
+	
+Projection
+=====================
+the names of properties of the object are the same with the parameters of stored procedure
+ 
+	string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+ 	IQueryAsync storedProcedure = new StoredProcedure(connString);
+	IEnumerable<dynamic> result =await storedProcedure.ExecuteAsync("proc_Login", new {UserName="BillGates",Password="WinRT"});
+	
+	IEnumerable<User> users=	result.Select(x=>new User{
+													FirstName=x.First_Name,
+													LastName=x.Last_Name
+												});
