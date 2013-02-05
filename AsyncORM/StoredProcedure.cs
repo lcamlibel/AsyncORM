@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Linq;
 using System.Threading.Tasks;
 using AsyncORM.interfaces;
 
@@ -37,47 +38,10 @@ namespace AsyncORM
                             IEnumerable<dynamic> items;
                             using (SqlDataReader reader = await comm.ExecuteReaderAsync())
                             {
-                                items = await reader.ToExpandoListAsync();
-                            }
-                            trans.Commit();
-                            return items;
-                        }
-                    }
-                    catch
-                    {
-                        trans.Rollback();
-                        throw;
-                    }
-                }
-            }
-        }
-
-        public async Task<IEnumerable<dynamic>> ExecuteMultipleResultSetAsync(string storedProcedure,
-                                                                              object dbParams = null,
-                                                                              IsolationLevel isolationLevel =
-                                                                                  IsolationLevel.ReadCommitted,
-                                                                              int commandTimeout = 30)
-        {
-            using (var conn = new SqlConnection(ConnectionString))
-            {
-                await conn.OpenAsync();
-                using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
-                {
-                    try
-                    {
-                        using (SqlCommand comm = conn.CreateCommand())
-                        {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm,
-                                                  dbParams);
-                            IEnumerable<IEnumerable<dynamic>> items;
-                            using (SqlDataReader reader = await comm.ExecuteReaderAsync())
-                            {
                                 items = await reader.ToExpandoMultipleListAsync();
                             }
                             trans.Commit();
-                            return items;
+                            return items.Count() == 1 ? items.ElementAt(0) : items;
                         }
                     }
                     catch

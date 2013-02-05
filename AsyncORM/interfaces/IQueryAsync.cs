@@ -12,12 +12,6 @@ namespace AsyncORM.interfaces
                                                 IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                                 int commandTimeout = 30);
 
-        Task<IEnumerable<dynamic>> ExecuteMultipleResultSetAsync(string commandText,
-                                                                 object dbParams = null,
-                                                                 IsolationLevel isolationLevel =
-                                                                     IsolationLevel.ReadCommitted,
-                                                                 int commandTimeout = 30);
-
         Task ExecuteNonQueryAsync(string commandText,
                                   object dbParams = null, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                   int commandTimeout = 30);
