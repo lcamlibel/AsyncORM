@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Data;
-using System.Data.Common;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -21,86 +20,105 @@ namespace AsyncORM
                                                int commandTimeout,
                                                IDbCommand comm, object parameters = null)
         {
-            comm.CommandType = commandType;
-            comm.CommandText = commandText;
-            comm.CommandTimeout = commandTimeout;
-            comm.Transaction = transaction;
-            if (parameters != null)
-            {
-                await AddParametersAsync(comm, parameters);
-            }
+            await Task.Run(async () =>
+                                     {
+                                         comm.CommandType = commandType;
+                                         comm.CommandText = commandText;
+                                         comm.CommandTimeout = commandTimeout;
+                                         comm.Transaction = transaction;
+                                         if (parameters != null)
+                                         {
+                                             await AddParametersAsync(comm, parameters);
+                                         }
+                                     });
         }
 
         protected async Task SetupCommandAsync(CommandType commandType, string commandText,
                                                int commandTimeout,
                                                IDbCommand comm, object parameters = null)
         {
-            comm.CommandType = commandType;
-            comm.CommandText = commandText;
-            comm.CommandTimeout = commandTimeout;
-            if (parameters != null)
-            {
-                await AddParametersAsync(comm, parameters);
-            }
+            await Task.Run(async () =>
+                                     {
+                                         comm.CommandType = commandType;
+                                         comm.CommandText = commandText;
+                                         comm.CommandTimeout = commandTimeout;
+                                         if (parameters != null)
+                                         {
+                                             await AddParametersAsync(comm, parameters);
+                                         }
+                                     });
         }
 
         protected async Task AddParametersAsync(IDbCommand comm, object dbParams)
         {
+            await Task.Run(async () =>
+                                     {
+                                         var dynoParams = dbParams as IDictionary<string, object>;
+                                         if (dynoParams == null)
+                                         {
+                                             await ParseObject(comm, dbParams);
+                                         }
+                                         else
+                                         {
+                                             await ParseExpandaObject(comm, dynoParams);
+                                         }
+                                     });
+        }
+
+        private static async Task ParseObject(IDbCommand comm, object dbParams)
+        {
             await Task.Run(() =>
                                {
-                                   var dynoParams = dbParams as IDictionary<string, object>;
-                                   if (dynoParams == null)
+                                   PropertyInfo[] props = dbParams.GetType().GetProperties();
+
+                                   var length = props.Length;
+                                   for (var index = 0; index < length; index++)
                                    {
-                                       ParseObject(comm, dbParams);
-                                   }
-                                   else
-                                   {
-                                       ParseExpandaObject(comm, dynoParams);
+                                       PropertyInfo item = props[index];
+                                       IDbDataParameter param;
+                                       if (item.PropertyType == typeof (IDbDataParameter))
+                                       {
+                                           param = (IDbDataParameter) item.GetValue(dbParams, null);
+                                       }
+                                       else
+                                       {
+                                           param = new SqlParameter
+                                                       {
+                                                           ParameterName = string.Concat("@", item.Name),
+                                                           Value = item.GetValue(dbParams, null),
+                                                           Direction = ParameterDirection.Input
+                                                       };
+                                       }
+                                       if (param != null)
+                                           comm.Parameters.Add(param);
                                    }
                                });
         }
 
-        private static void ParseObject(IDbCommand comm, object dbParams)
+        private static async Task ParseExpandaObject(IDbCommand comm, IEnumerable<KeyValuePair<string, object>> dbParams)
         {
-            PropertyInfo[] props = dbParams.GetType().GetProperties();
-            for (int index = 0; index < props.Length; index++)
-            {
-                IDbDataParameter param;
-                PropertyInfo item = props[index];
-                if (item.PropertyType == typeof (IDbDataParameter) || item.PropertyType == typeof (DbParameter) ||
-                    item.PropertyType.IsSubclassOf(typeof (DbParameter)))
-                {
-                    param = (IDbDataParameter) item.GetValue(dbParams, null);
-                }
-                else
-                {
-                    param = comm.CreateParameter();
-                    param.ParameterName = string.Concat("@", item.Name);
-                    param.Value = item.GetValue(dbParams, null);
-                }
-                if (param != null)
-                    comm.Parameters.Add(param);
-            }
-        }
-
-        private static void ParseExpandaObject(IDbCommand comm, IEnumerable<KeyValuePair<string, object>> dbParams)
-        {
-            foreach (var valuepair in dbParams)
-            {
-                IDbDataParameter param;
-                var dataParameter = valuepair.Value as IDbDataParameter;
-                if (dataParameter != null)
-                {
-                    param = dataParameter;
-                }
-                else
-                {
-                    param = comm.CreateParameter();
-                    param.ParameterName = string.Concat("@", valuepair.Key);
-                    param.Value = valuepair.Value;
-                }
-                comm.Parameters.Add(param);
-            }
+            await Task.Run(() =>
+                               {
+                                   foreach (var valuepair in dbParams)
+                                   {
+                                       IDbDataParameter param;
+                                       var dataParameter = valuepair.Value as IDbDataParameter;
+                                       if (dataParameter != null)
+                                       {
+                                           param = dataParameter;
+                                       }
+                                       else
+                                       {
+                                           param = new SqlParameter
+                                                       {
+                                                           ParameterName = string.Concat("@", valuepair.Key),
+                                                           Value = valuepair.Value,
+                                                           Direction = ParameterDirection.Input
+                                                       };
+                                       }
+                                       comm.Parameters.Add(param);
+                                   }
+                               });
         }
     }
 }

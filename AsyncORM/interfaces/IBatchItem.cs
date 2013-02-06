@@ -1,6 +1,6 @@
 ﻿namespace AsyncORM.interfaces
 {
-    public interface IBatchSetting
+    public interface IBatchItem
     {
         string CommandText { get; set; }
         object DbParams { get; set; }

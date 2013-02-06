@@ -83,7 +83,7 @@ namespace AsyncORM
                 }
             }
         }
-        public async Task ExecuteNonQueryAsync(IEnumerable<IBatchSetting> batchSettings,
+        public async Task ExecuteNonQueryAsync(IEnumerable<IBatchItem> batchItems,
                                              IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                              int commandTimeout = 30)
         {
@@ -94,7 +94,7 @@ namespace AsyncORM
                 {
                     try
                     {
-                        foreach (var setting in batchSettings)
+                        foreach (var setting in batchItems)
                         {
                             using (SqlCommand comm = conn.CreateCommand())
                             {

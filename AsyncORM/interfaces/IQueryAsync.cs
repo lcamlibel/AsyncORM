@@ -16,7 +16,7 @@ namespace AsyncORM.interfaces
                                   object dbParams = null, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                   int commandTimeout = 30);
 
-        Task ExecuteNonQueryAsync(IEnumerable<IBatchSetting> batchSettings,
+        Task ExecuteNonQueryAsync(IEnumerable<IBatchItem> batchItems,
                                   IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                   int commandTimeout = 30);
 

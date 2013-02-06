@@ -10,30 +10,36 @@ namespace AsyncORM
     {
         public static async Task<IEnumerable<dynamic>> ToExpandoListAsync(this SqlDataReader rdr)
         {
-            var result = new List<dynamic>();
+            return await Task.Run(async () =>
+                                            {
+                                                var result = new List<dynamic>();
 
-            while (await rdr.ReadAsync())
-            {
-                result.Add(await rdr.RecordToExpandoAsync());
-            }
-            return result;
+                                                while (await rdr.ReadAsync())
+                                                {
+                                                    result.Add(await rdr.RecordToExpandoAsync());
+                                                }
+                                                return result;
+                                            });
         }
 
         public static async Task<IEnumerable<IEnumerable<dynamic>>> ToExpandoMultipleListAsync(this SqlDataReader rdr)
         {
-            var result = new List<List<dynamic>>();
-            do
-            {
-                var list = new List<dynamic>();
-                while (await rdr.ReadAsync())
-                {
-                    list.Add(await rdr.RecordToExpandoAsync());
-                }
-                if (list.Count > 0)
-                    result.Add(list);
-            } while (await rdr.NextResultAsync());
+            return await Task.Run(async () =>
+                                            {
+                                                var result = new List<List<dynamic>>();
+                                                do
+                                                {
+                                                    var list = new List<dynamic>();
+                                                    while (await rdr.ReadAsync())
+                                                    {
+                                                        list.Add(await rdr.RecordToExpandoAsync());
+                                                    }
+                                                    if (list.Count > 0)
+                                                        result.Add(list);
+                                                } while (await rdr.NextResultAsync());
 
-            return result;
+                                                return result;
+                                            });
         }
 
         public static async Task<dynamic> RecordToExpandoAsync(this SqlDataReader rdr)
