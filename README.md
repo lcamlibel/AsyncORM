@@ -1,4 +1,4 @@
-Async Micro ORM
+Async ORM
 ========
 A very lightweight dynamic asynchronous data access for .NET, written in C#. 
 
