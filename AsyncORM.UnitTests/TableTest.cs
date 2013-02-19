@@ -24,7 +24,7 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
                                              {
                                                  PrimaryKeys = new List<IPrimaryKey>
                                                                    {
@@ -34,10 +34,10 @@ namespace AsyncORM.UnitTests
                                                                                Name = "CustomerId"
                                                                            }
                                                                    },
-                                                                   TableName = "Customer"
+                                                                   TableName = "TestCustomer"
                                              };
            ITable table=new Table(connString);
-            await table.InsertAsync(setting, new {CustomerName = "Test", Address = "Address1"});
+            await table.InsertAsync(new {CustomerName = "Test1", Address = "Address1", LocationId=1}, setting);
 
         }
         [TestMethod]
@@ -45,7 +45,7 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
             {
                 PrimaryKeys = new List<IPrimaryKey>
                                                                    {
@@ -55,10 +55,10 @@ namespace AsyncORM.UnitTests
                                                                                Name = "CustomerId"
                                                                            }
                                                                    },
-                TableName = "Customer"
+                TableName = "TestCustomer"
             };
             ITable table = new Table(connString);
-            await table.UpdateAsync(setting, new { CustomerId=1,CustomerName = "TestUpdate", Address = "Address Update" });
+            await table.UpdateAsync(new { CustomerId=2,CustomerName = "TestUpdate2", Address = "Address Update2",LocationId=1 }, setting);
 
         }
         [TestMethod]
@@ -66,14 +66,22 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
             {
-                TableName = "Customer",
+                PrimaryKeys = new List<IPrimaryKey>
+                                                                   {
+                                                                       new PrimaryKey
+                                                                           {
+                                                                               IsIdentity = true,
+                                                                               Name = "CustomerId"
+                                                                           }
+                                                                   },
+                TableName = "TestCustomer",
                 Where="CustomerId=@CustomerId"
                 
             };
             ITable table = new Table(connString);
-            await table.UpdateAsync(setting, new { CustomerName = "TestUpdate With Where", Address = "Address Update With Where" });
+            await table.UpdateAsync(new {CustomerId=2, CustomerName = "TestUpdate With Where3", Address = "Address Update With Where3", LocationId = 1 }, setting);
 
         }
         [TestMethod]
@@ -81,14 +89,15 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
             {
-                TableName = "Customer",
-                Where = "CustomerName like '%Henry%'"
+
+                TableName = "TestCustomer",
+                Where = "CustomerName like '%TestUpdat%'"
 
             };
             ITable table = new Table(connString);
-            await table.UpdateAsync(setting, new { CustomerName = "TestUpdate With Henry", Address = "Address Update With Henry" });
+            await table.UpdateAsync(new { CustomerName = "TestUpdate With Henry", Address = "Address Update With Henry" }, setting);
 
         }
         [TestMethod]
@@ -97,14 +106,14 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
             {
                 TableName = "Customer",
                 Where = "CustomerName like '%Henry%'"
 
             };
             ITable table = new Table(connString);
-            await table.UpdateAsync(setting, null);
+            await table.UpdateAsync(null, setting);
 
         }
         [TestMethod]
@@ -113,7 +122,7 @@ namespace AsyncORM.UnitTests
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             ;
-            TableOperationSetting setting = new TableOperationSetting
+            TableSetting setting = new TableSetting
             {
                 PrimaryKeys = new List<IPrimaryKey>
                                                                    {
@@ -131,7 +140,7 @@ namespace AsyncORM.UnitTests
                 TableName = "Customer"
             };
             ITable table = new Table(connString);
-            await table.InsertAsync(setting, new { CustomerId = 1, CustomerName = "TestUpdate", Address = "Address Update" });
+            await table.InsertAsync(new { CustomerId = 1, CustomerName = "TestUpdate", Address = "Address Update" }, setting);
 
         }
     }

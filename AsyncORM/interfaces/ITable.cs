@@ -5,8 +5,8 @@ namespace AsyncORM.interfaces
 {
     public interface ITable
     {
-        Task<dynamic> InsertAsync(TableOperationSetting tableOperationSetting, dynamic entity);
-        Task UpdateAsync(TableOperationSetting tableOperationSetting, dynamic entity);
-        Task DeleteAsync(TableOperationSetting tableOperationSetting, dynamic entity);
+        Task<dynamic> InsertAsync(dynamic entity, TableSetting tableSetting);
+        Task UpdateAsync(dynamic entity, TableSetting tableSetting);
+        Task DeleteAsync(TableSetting tableSetting, dynamic entity);
     }
 }

@@ -3,7 +3,7 @@ using AsyncORM.DirectTable;
 
 namespace AsyncORM.interfaces
 {
-    public interface ITableOperationSetting
+    public interface ITableSetting
     {
         List<IPrimaryKey> PrimaryKeys { get; set; }
         string TableName { get; set; }
