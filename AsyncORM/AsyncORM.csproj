@@ -43,8 +43,8 @@
     <Compile Include="BatchItem.cs" />
     <Compile Include="DataReaderAsyncExtensions.cs" />
     <Compile Include="BulkCopyDestinationSetting.cs" />
-    <Compile Include="DirectTable\PrimaryKey.cs" />
-    <Compile Include="DirectTable\TableSetting.cs" />
+    <Compile Include="PrimaryKey.cs" />
+    <Compile Include="TableSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
     <Compile Include="interfaces\IBatchItem.cs" />
     <Compile Include="interfaces\IBulkCopyDestinationSetting.cs" />
@@ -56,7 +56,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="BulkCopySourceSetting.cs" />
     <Compile Include="StoredProcedure.cs" />
-    <Compile Include="DirectTable\Table.cs" />
+    <Compile Include="Table.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

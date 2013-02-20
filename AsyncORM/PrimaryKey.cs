@@ -1,6 +1,6 @@
 ﻿using AsyncORM.interfaces;
 
-namespace AsyncORM.DirectTable
+namespace AsyncORM
 {
     public class PrimaryKey : IPrimaryKey
     {

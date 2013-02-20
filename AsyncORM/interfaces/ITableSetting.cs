@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using AsyncORM.DirectTable;
 
 namespace AsyncORM.interfaces
 {
@@ -7,8 +6,5 @@ namespace AsyncORM.interfaces
     {
         List<IPrimaryKey> PrimaryKeys { get; set; }
         string TableName { get; set; }
-        string Where { get; set; }
-        
-
     }
 }

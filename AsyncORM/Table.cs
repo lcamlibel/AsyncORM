@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AsyncORM.interfaces;
 
-namespace AsyncORM.DirectTable
+namespace AsyncORM
 {
     public class Table : ITable
     {
@@ -18,40 +18,39 @@ namespace AsyncORM.DirectTable
 
         public async Task<dynamic> InsertAsync(dynamic entity, TableSetting tableSetting)
         {
-            return await Task.Run(async () =>
-                                            {
-                                                bool isIdentity =
-                                                    tableSetting.PrimaryKeys.Any(x => x.IsIdentity);
-                                                if (isIdentity && tableSetting.PrimaryKeys.Count > 1)
-                                                {
-                                                    throw new ArgumentException(
-                                                        "There more than one primary key and at least one marked as Idenity true.");
-                                                }
-                                                if (String.IsNullOrWhiteSpace(tableSetting.TableName))
-                                                    throw new ArgumentException("Table name cannot be empty.");
-                                                if (entity == null)
-                                                    throw new ArgumentException("entity cannot be null.");
+            return await Task.Run<dynamic>(async () =>
+                                                     {
+                                                         bool isIdentity =
+                                                             tableSetting.PrimaryKeys.Any(x => x.IsIdentity);
+                                                         if (isIdentity && tableSetting.PrimaryKeys.Count > 1)
+                                                         {
+                                                             throw new ArgumentException(
+                                                                 "There more than one primary key and at least one marked as Idenity true.");
+                                                         }
+                                                         if (String.IsNullOrWhiteSpace(tableSetting.TableName))
+                                                             throw new ArgumentException("Table name cannot be empty.");
+                                                         if (entity == null)
+                                                             throw new ArgumentException("entity cannot be null.");
 
-                                                string insertStatement =
-                                                    await
-                                                    PrepareInsertStatement(tableSetting, entity, isIdentity);
-                                                IQueryAsync query = new DynamicQuery(_connectionString);
-                                                if (isIdentity)
-                                                    return
-                                                        await
-                                                        query.ExecuteScalarAsync(insertStatement, entity);
-                                                await
-                                                    query.ExecuteNonQueryAsync(insertStatement, entity);
-                                                return null;
-                                            });
+                                                         string insertStatement =
+                                                             await
+                                                             PrepareInsertStatement(tableSetting, entity, isIdentity);
+                                                         IQueryAsync query = new DynamicQuery(_connectionString);
+                                                         if (isIdentity)
+                                                             return
+                                                                 await
+                                                                 query.ExecuteScalarAsync(insertStatement, entity);
+                                                         await
+                                                             query.ExecuteNonQueryAsync(insertStatement, entity);
+                                                         return null;
+                                                     });
         }
 
-        public async Task UpdateAsync(dynamic entity, TableSetting tableSetting)
+        public async Task UpdateAsync(dynamic entity, TableSetting tableSetting, string where = null)
         {
             await Task.Run(async () =>
                                      {
-                                         if (String.IsNullOrWhiteSpace(tableSetting.Where) &&
-                                             !tableSetting.PrimaryKeys.Any())
+                                         if (String.IsNullOrWhiteSpace(where) && !tableSetting.PrimaryKeys.Any())
                                          {
                                              throw new ArgumentException(
                                                  "No primary key or where statement found. please provide at least one");
@@ -62,18 +61,17 @@ namespace AsyncORM.DirectTable
                                              throw new ArgumentException("entity cannot be null.");
 
                                          string updateStatement =
-                                             await PrepareUpdateStatement(tableSetting, entity);
+                                             await PrepareUpdateStatement(tableSetting, entity, where);
                                          IQueryAsync query = new DynamicQuery(_connectionString);
                                          await query.ExecuteNonQueryAsync(updateStatement, entity);
                                      });
         }
 
-        public async Task DeleteAsync(TableSetting tableSetting, dynamic entity)
+        public async Task DeleteAsync(TableSetting tableSetting, dynamic entity, string where = null)
         {
             await Task.Run(async () =>
                                      {
-                                         if (String.IsNullOrWhiteSpace(tableSetting.Where) &&
-                                             !tableSetting.PrimaryKeys.Any())
+                                         if (String.IsNullOrWhiteSpace(where) && !tableSetting.PrimaryKeys.Any())
                                          {
                                              throw new ArgumentException(
                                                  "No primary key or where statement found. please provide at least one");
@@ -84,7 +82,7 @@ namespace AsyncORM.DirectTable
                                              throw new ArgumentException("entity cannot be null.");
 
                                          string deleteStatement =
-                                             await PrepareDeleteStatement(tableSetting);
+                                             await PrepareDeleteStatement(tableSetting, where);
                                          IQueryAsync query = new DynamicQuery(_connectionString);
                                          await query.ExecuteNonQueryAsync(deleteStatement, entity);
                                      });
@@ -129,7 +127,7 @@ namespace AsyncORM.DirectTable
                                       });
         }
 
-        private async Task<string> PrepareUpdateStatement(TableSetting tableSetting, dynamic entity)
+        private async Task<string> PrepareUpdateStatement(TableSetting tableSetting, dynamic entity, string where)
         {
             return await Task.Run(() =>
                                       {
@@ -146,9 +144,9 @@ namespace AsyncORM.DirectTable
 
                                           string query = queryBuilder.ToString().TrimEnd(',');
                                           queryBuilder = new StringBuilder(query);
-                                          if (!String.IsNullOrWhiteSpace(tableSetting.Where))
+                                          if (!String.IsNullOrWhiteSpace(where))
                                           {
-                                              queryBuilder.AppendFormat(" WHERE {0}", tableSetting.Where);
+                                              queryBuilder.AppendFormat(" WHERE {0}", where);
                                               if (tableSetting.PrimaryKeys != null)
                                               {
                                                   foreach (IPrimaryKey primaryKey in tableSetting.PrimaryKeys)
@@ -159,30 +157,30 @@ namespace AsyncORM.DirectTable
                                               }
                                               return queryBuilder.ToString();
                                           }
-                                         if (tableSetting.PrimaryKeys == null)
-                                              throw  new ArgumentException("Primary Key cannot be empty.");
+                                          if (tableSetting.PrimaryKeys == null)
+                                              throw new ArgumentException("Primary Key cannot be empty.");
 
                                           queryBuilder.Append(" WHERE ");
                                           foreach (IPrimaryKey primaryKey in tableSetting.PrimaryKeys)
                                           {
                                               queryBuilder.Replace(String.Format("{0}=@{0},", primaryKey.Name),
-                                                                          string.Empty);
+                                                                   string.Empty);
                                               queryBuilder.AppendFormat("{0}=@{0} &&", primaryKey.Name);
                                           }
                                           return queryBuilder.ToString().TrimEnd('&');
                                       });
         }
 
-        private async Task<string> PrepareDeleteStatement(TableSetting tableSetting)
+        private async Task<string> PrepareDeleteStatement(TableSetting tableSetting, string where)
         {
             return await Task.Run(() =>
                                       {
                                           var queryBuilder = new StringBuilder();
                                           queryBuilder.AppendFormat("DELETE FROM {0} ", tableSetting.TableName);
 
-                                          if (!String.IsNullOrWhiteSpace(tableSetting.Where))
+                                          if (!String.IsNullOrWhiteSpace(where))
                                           {
-                                              queryBuilder.AppendFormat(" WHERE {0}", tableSetting.Where);
+                                              queryBuilder.AppendFormat(" WHERE {0}", where);
                                               return queryBuilder.ToString();
                                           }
                                           queryBuilder.Append(" WHERE ");
