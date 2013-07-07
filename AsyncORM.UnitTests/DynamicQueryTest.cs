@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AsyncORM.interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -56,6 +57,42 @@ namespace AsyncORM.UnitTests
             var departments = result.Select(x => new {DepartmentId = x.DepartmentID, DeptName = x.Name});
             Assert.IsTrue(departments.Any());
         }
-       
+        [TestMethod]
+        public async Task ExecuteAsync_SingleResultSetAsync_GenericList()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync dynamicQuery = new DynamicQuery(connString);
+            IEnumerable<Address> result =
+                await
+                dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
+            Assert.IsTrue(result.Count() == 10);
+
+        }
+        [TestMethod]
+        public async Task ExecuteAsync_Verify_Type()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync dynamicQuery = new DynamicQuery(connString);
+            IEnumerable<Address> result =
+                await
+                 dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
+            Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
+
+        }
+        [TestMethod]
+        [ExpectedException(typeof(TaskCanceledException))]
+        public async Task ExecuteAsync_CancelationToken()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync dynamicQuery = new DynamicQuery(connString);
+            var tokenSource = new CancellationTokenSource();
+            var task =dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]",cancellationToken:tokenSource.Token);
+            
+            tokenSource.Cancel();
+            await Task.WhenAll(task);
+            
+            Assert.IsTrue(!task.Result.Any());
+
+        }
     }
 }

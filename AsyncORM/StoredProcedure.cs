@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AsyncORM.interfaces;
 
@@ -20,11 +22,11 @@ namespace AsyncORM
                                                              object dbParams = null,
                                                              IsolationLevel isolationLevel =
                                                                  IsolationLevel.ReadCommitted,
-                                                             int commandTimeout = 30)
+                                                             int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.OpenAsync();
+                await conn.OpenAsync(cancellationToken);
                 using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
                 {
                     try
@@ -33,12 +35,12 @@ namespace AsyncORM
                         {
                             await
                                 SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm,
+                                                  comm,cancellationToken,
                                                   dbParams);
                             IEnumerable<dynamic> items;
-                            using (SqlDataReader reader = await comm.ExecuteReaderAsync())
+                            using (SqlDataReader reader = await comm.ExecuteReaderAsync(cancellationToken))
                             {
-                                items = await reader.ToExpandoMultipleListAsync();
+                                items = await reader.ToExpandoMultipleListAsync(cancellationToken);
                             }
                             trans.Commit();
                             return items.Count() == 1 ? items.ElementAt(0) : items;
@@ -52,15 +54,15 @@ namespace AsyncORM
                 }
             }
         }
-
-        public async Task ExecuteNonQueryAsync(string storedProcedure,
-                                               object dbParams = null,
-                                               IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-                                               int commandTimeout = 30)
+        public async Task<IEnumerable<T>> ExecuteAsync<T>(string storedProcedure,
+                                                           object dbParams = null,
+                                                           IsolationLevel isolationLevel =
+                                                               IsolationLevel.ReadCommitted,
+                                                           int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.OpenAsync();
+               await conn.OpenAsync(cancellationToken);
                 using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
                 {
                     try
@@ -69,9 +71,44 @@ namespace AsyncORM
                         {
                             await
                                 SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm,
+                                                  comm,cancellationToken,
                                                   dbParams);
-                            await comm.ExecuteNonQueryAsync();
+                            IEnumerable<T> items;
+                            using (SqlDataReader reader = await comm.ExecuteReaderAsync(cancellationToken))
+                            {
+                                items = await reader.ToGenericList<T>(cancellationToken);
+                            }
+                            trans.Commit();
+                            return items;
+                        }
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
+        public async Task ExecuteNonQueryAsync(string storedProcedure,
+                                               object dbParams = null,
+                                               IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+                                               int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+               await conn.OpenAsync(cancellationToken);
+                using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
+                {
+                    try
+                    {
+                        using (SqlCommand comm = conn.CreateCommand())
+                        {
+                            await
+                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
+                                                  comm,cancellationToken,
+                                                  dbParams);
+                            await comm.ExecuteNonQueryAsync(cancellationToken);
                         }
                         trans.Commit();
                     }
@@ -85,11 +122,11 @@ namespace AsyncORM
         }
         public async Task ExecuteNonQueryAsync(IEnumerable<IBatchItem> batchItems,
                                              IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-                                             int commandTimeout = 30)
+                                             int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.OpenAsync();
+               await conn.OpenAsync(cancellationToken);
                 using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
                 {
                     try
@@ -100,8 +137,8 @@ namespace AsyncORM
                             {
                                 await
                                     SetupCommandAsync(trans, CommandType.StoredProcedure, setting.CommandText,
-                                                      commandTimeout, comm, setting.DbParams);
-                                await comm.ExecuteNonQueryAsync();
+                                                      commandTimeout, comm, cancellationToken,setting.DbParams);
+                                await comm.ExecuteNonQueryAsync(cancellationToken);
                             }
                         }
                         trans.Commit();
@@ -117,11 +154,11 @@ namespace AsyncORM
         public async Task<object> ExecuteScalarAsync(string storedProcedure,
                                                      object dbParams = null,
                                                      IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-                                                     int commandTimeout = 30)
+                                                     int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var conn = new SqlConnection(ConnectionString))
             {
-                await conn.OpenAsync();
+               await conn.OpenAsync(cancellationToken);
                 using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
                 {
                     try
@@ -131,9 +168,9 @@ namespace AsyncORM
                         {
                             await
                                 SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm,
+                                                  comm,cancellationToken,
                                                   dbParams);
-                            data = await comm.ExecuteScalarAsync();
+                            data = await comm.ExecuteScalarAsync(cancellationToken);
                         }
                         trans.Commit();
                         return data;
@@ -146,27 +183,64 @@ namespace AsyncORM
                 }
             }
         }
-
+        public async Task<T> ExecuteScalarAsync<T>(string storedProcedure,
+                                                    object dbParams = null,
+                                                    IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
+                                                    int commandTimeout = 30, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            using (var conn = new SqlConnection(ConnectionString))
+            {
+                await conn.OpenAsync(cancellationToken);
+                using (SqlTransaction trans = conn.BeginTransaction(isolationLevel))
+                {
+                    try
+                    {
+                        object data;
+                        using (SqlCommand comm = conn.CreateCommand())
+                        {
+                            await
+                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
+                                                  comm,cancellationToken,
+                                                  dbParams);
+                            data = await comm.ExecuteScalarAsync(cancellationToken);
+                        }
+                        trans.Commit();
+                        try
+                        {
+                            return (T)Convert.ChangeType(data, typeof(T));
+                        }
+                        catch
+                        {
+                            return default(T);
+                        }
+                    }
+                    catch
+                    {
+                        trans.Rollback();
+                        throw;
+                    }
+                }
+            }
+        }
         public async Task BulkCopyAsync(IBulkCopySourceSetting bulkCopyBulkCopySourceSettings,
                                         IBulkCopyDestinationSetting bulkCopyDestinationSetting,
-                                        SqlRowsCopiedEventHandler copiedEventHandler = null)
+                                        SqlRowsCopiedEventHandler copiedEventHandler = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             using (var sourceConnection = new SqlConnection(bulkCopyBulkCopySourceSettings.ConnectionString))
             {
-                await sourceConnection.OpenAsync();
+                await sourceConnection.OpenAsync(cancellationToken);
 
                 using (SqlCommand commandSourceData = sourceConnection.CreateCommand())
                 {
                     await
                         SetupCommandAsync(CommandType.StoredProcedure, bulkCopyBulkCopySourceSettings.CommandText,
-                                          bulkCopyBulkCopySourceSettings.Timeout, commandSourceData,
-                                          bulkCopyBulkCopySourceSettings.Parameters);
+                                          bulkCopyBulkCopySourceSettings.Timeout, commandSourceData, cancellationToken,bulkCopyBulkCopySourceSettings.Parameters);
 
-                    SqlDataReader reader = await commandSourceData.ExecuteReaderAsync();
+                    SqlDataReader reader = await commandSourceData.ExecuteReaderAsync(cancellationToken);
 
                     using (var destinationConnection = new SqlConnection(bulkCopyDestinationSetting.ConnectionString))
                     {
-                        await destinationConnection.OpenAsync();
+                        await destinationConnection.OpenAsync(cancellationToken);
 
                         using (SqlTransaction transaction = destinationConnection.BeginTransaction())
                         {
@@ -183,7 +257,7 @@ namespace AsyncORM
                                     bulkCopy.SqlRowsCopied += copiedEventHandler;
                                 try
                                 {
-                                    await bulkCopy.WriteToServerAsync(reader);
+                                    await bulkCopy.WriteToServerAsync(reader, cancellationToken);
                                     transaction.Commit();
                                 }
                                 catch

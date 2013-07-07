@@ -2,6 +2,7 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AsyncORM
@@ -18,7 +19,7 @@ namespace AsyncORM
 
         protected async Task SetupCommandAsync(IDbTransaction transaction, CommandType commandType, string commandText,
                                                int commandTimeout,
-                                               IDbCommand comm, object parameters = null)
+                                               IDbCommand comm, CancellationToken cancellationToken, object parameters = null)
         {
             await Task.Run(async () =>
                                      {
@@ -28,14 +29,14 @@ namespace AsyncORM
                                          comm.Transaction = transaction;
                                          if (parameters != null)
                                          {
-                                             await AddParametersAsync(comm, parameters);
+                                             await AddParametersAsync(comm, parameters,cancellationToken);
                                          }
-                                     });
+                                     },cancellationToken);
         }
 
         protected async Task SetupCommandAsync(CommandType commandType, string commandText,
                                                int commandTimeout,
-                                               IDbCommand comm, object parameters = null)
+                                               IDbCommand comm, CancellationToken cancellationToken ,object parameters = null)
         {
             await Task.Run(async () =>
                                      {
@@ -44,28 +45,28 @@ namespace AsyncORM
                                          comm.CommandTimeout = commandTimeout;
                                          if (parameters != null)
                                          {
-                                             await AddParametersAsync(comm, parameters);
+                                             await AddParametersAsync(comm, parameters,cancellationToken);
                                          }
-                                     });
+                                     },cancellationToken);
         }
 
-        protected async Task AddParametersAsync(IDbCommand comm, object dbParams)
+        protected async Task AddParametersAsync(IDbCommand comm, object dbParams, CancellationToken cancellationToken )
         {
             await Task.Run(async () =>
                                      {
                                          var dynoParams = dbParams as IDictionary<string, object>;
                                          if (dynoParams == null)
                                          {
-                                             await ParseObject(comm, dbParams);
+                                             await ParseObject(comm, dbParams,cancellationToken);
                                          }
                                          else
                                          {
-                                             await ParseExpandaObject(comm, dynoParams);
+                                             await ParseExpandaObjectAsync(comm, dynoParams,cancellationToken);
                                          }
-                                     });
+                                     },cancellationToken);
         }
 
-        private static async Task ParseObject(IDbCommand comm, object dbParams)
+        private static async Task ParseObject(IDbCommand comm, object dbParams, CancellationToken cancellationToken )
         {
             await Task.Run(() =>
                                {
@@ -92,10 +93,10 @@ namespace AsyncORM
                                        if (param != null)
                                            comm.Parameters.Add(param);
                                    }
-                               });
+                               },cancellationToken);
         }
 
-        private static async Task ParseExpandaObject(IDbCommand comm, IEnumerable<KeyValuePair<string, object>> dbParams)
+        private static async Task ParseExpandaObjectAsync(IDbCommand comm, IEnumerable<KeyValuePair<string, object>> dbParams, CancellationToken cancellationToken )
         {
             await Task.Run(() =>
                                {
@@ -118,7 +119,7 @@ namespace AsyncORM
                                        }
                                        comm.Parameters.Add(param);
                                    }
-                               });
+                               },cancellationToken);
         }
     }
 }
