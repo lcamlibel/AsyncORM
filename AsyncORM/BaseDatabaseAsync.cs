@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
@@ -10,13 +12,20 @@ namespace AsyncORM
     public class BaseDatabaseAsync
     {
         protected readonly string ConnectionString;
-
+        protected ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>> _localCache;
+        public static AsyncOrmConfig Config = new AsyncOrmConfig();
         public BaseDatabaseAsync(string connectionString)
         {
             var connBuilder = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true};
             ConnectionString = connBuilder.ConnectionString;
+            _localCache = new ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>>();
         }
-
+        public BaseDatabaseAsync()
+        {
+            var connBuilder = new SqlConnectionStringBuilder(Config.ConnectionString) { AsynchronousProcessing = true };
+            ConnectionString = connBuilder.ConnectionString;
+            _localCache = new ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>>();
+        } 
         protected async Task SetupCommandAsync(IDbTransaction transaction, CommandType commandType, string commandText,
                                                int commandTimeout,
                                                IDbCommand comm, CancellationToken cancellationToken, object parameters = null)
@@ -57,7 +66,7 @@ namespace AsyncORM
                                          var dynoParams = dbParams as IDictionary<string, object>;
                                          if (dynoParams == null)
                                          {
-                                             await ParseObject(comm, dbParams,cancellationToken);
+                                             await ParseObjectAsync(comm, dbParams,cancellationToken);
                                          }
                                          else
                                          {
@@ -66,7 +75,7 @@ namespace AsyncORM
                                      },cancellationToken);
         }
 
-        private static async Task ParseObject(IDbCommand comm, object dbParams, CancellationToken cancellationToken )
+        private static async Task ParseObjectAsync(IDbCommand comm, object dbParams, CancellationToken cancellationToken )
         {
             await Task.Run(() =>
                                {
@@ -110,7 +119,7 @@ namespace AsyncORM
                                        }
                                        else
                                        {
-                                           param = new SqlParameter
+                                               param = new SqlParameter
                                                        {
                                                            ParameterName = string.Concat("@", valuepair.Key),
                                                            Value = valuepair.Value,

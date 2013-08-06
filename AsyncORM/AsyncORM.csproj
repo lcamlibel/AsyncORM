@@ -39,6 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsyncLazy.cs" />
+    <Compile Include="AsyncOrmConfig.cs" />
     <Compile Include="BaseDatabaseAsync.cs" />
     <Compile Include="BatchItem.cs" />
     <Compile Include="DataReaderAsyncExtensions.cs" />

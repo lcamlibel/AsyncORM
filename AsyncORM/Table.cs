@@ -20,7 +20,7 @@ namespace AsyncORM
         public async Task<dynamic> InsertAsync(dynamic entity, TableSetting tableSetting,
                                                CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await Task.Run<dynamic>(async () =>
+            return await new AsyncLazy<dynamic>(async () =>
                                                      {
                                                          bool isIdentity =
                                                              tableSetting.PrimaryKeys.Any(x => x.IsIdentity);
@@ -97,7 +97,7 @@ namespace AsyncORM
         public async Task<T> InsertAsync<T>(dynamic entity, TableSetting tableSetting,
                                             CancellationToken cancellationToken = default(CancellationToken))
         {
-            return await Task.Run<dynamic>(async () =>
+            return await new AsyncLazy<dynamic>(async () =>
                                                      {
                                                          bool isIdentity =
                                                              tableSetting.PrimaryKeys.Any(x => x.IsIdentity);
@@ -135,7 +135,7 @@ namespace AsyncORM
                                                                CancellationToken cancellationToken =
                                                                    default(CancellationToken))
         {
-            return await Task.Run(() =>
+            return await new AsyncLazy<string>(() =>
                                       {
                                           IPrimaryKey primaryKey = null;
                                           if (isIdentity)
@@ -175,7 +175,7 @@ namespace AsyncORM
                                                                CancellationToken cancellationToken =
                                                                    default(CancellationToken))
         {
-            return await Task.Run(() =>
+            return await new AsyncLazy<string>(() =>
                                       {
                                           PropertyInfo[] props = entity.GetType().GetProperties();
                                           var queryBuilder = new StringBuilder();
@@ -221,7 +221,7 @@ namespace AsyncORM
                                                                CancellationToken cancellationToken =
                                                                    default(CancellationToken))
         {
-            return await Task.Run(() =>
+            return await new AsyncLazy<string>(() =>
                                       {
                                           var queryBuilder = new StringBuilder();
                                           queryBuilder.AppendFormat("DELETE FROM {0} ", tableSetting.TableName);

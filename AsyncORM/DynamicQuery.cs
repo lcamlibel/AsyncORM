@@ -14,7 +14,11 @@ namespace AsyncORM
         public DynamicQuery(string connectionString) : base(connectionString)
         {
         }
-
+        public DynamicQuery()
+        {
+            if (String.IsNullOrEmpty(Config.ConnectionString))
+                throw new ArgumentNullException("please setup global connection String  use the following: DynamicQuery.Config.Connection");
+        }
         #region IQueryAsync Members
 
         public async Task<IEnumerable<dynamic>> ExecuteAsync(string commandText,
@@ -72,7 +76,7 @@ namespace AsyncORM
                             IEnumerable<T> items;
                             using (SqlDataReader reader = await comm.ExecuteReaderAsync(cancellationToken))
                             {
-                                items = await reader.ToGenericList<T>(cancellationToken);
+                                items = await reader.ToGenericListAsync<T>(cancellationToken, _localCache);
 
                             }
                             trans.Commit();

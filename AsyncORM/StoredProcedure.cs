@@ -15,7 +15,11 @@ namespace AsyncORM
             : base(connectionString)
         {
         }
-
+        public StoredProcedure()
+        {
+            if (String.IsNullOrEmpty(Config.ConnectionString))
+                throw new ArgumentNullException("please setup global connection String  use the following: StoredProcedure.Config.Connection");
+        }
         #region IStoredProcedureAsync Members
 
         public async Task<IEnumerable<dynamic>> ExecuteAsync(string storedProcedure,
@@ -76,7 +80,7 @@ namespace AsyncORM
                             IEnumerable<T> items;
                             using (SqlDataReader reader = await comm.ExecuteReaderAsync(cancellationToken))
                             {
-                                items = await reader.ToGenericList<T>(cancellationToken);
+                                items = await reader.ToGenericListAsync<T>(cancellationToken,_localCache);
                             }
                             trans.Commit();
                             return items;

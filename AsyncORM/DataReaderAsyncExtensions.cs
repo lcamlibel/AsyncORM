@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Dynamic;
@@ -13,7 +14,7 @@ namespace AsyncORM
     {
         public static async Task<IEnumerable<dynamic>> ToExpandoListAsync(this SqlDataReader rdr, CancellationToken cancellationToken)
         {
-            return await Task.Run(async () =>
+            return await new AsyncLazy<IEnumerable<dynamic>>(async () =>
                                             {
                                                 var result = new List<dynamic>();
 
@@ -22,18 +23,24 @@ namespace AsyncORM
                                                     result.Add(await rdr.RecordToExpandoAsync(cancellationToken));
                                                 }
                                                 return result;
-                                            },cancellationToken);
+                                            }, cancellationToken);
         }
 
-        public static async Task<IEnumerable<T>> ToGenericList<T>(this SqlDataReader dr, CancellationToken cancellationToken)
+        public static async Task<IEnumerable<T>> ToGenericListAsync<T>(this SqlDataReader dr, CancellationToken cancellationToken, ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>> localCache)
         {
-            return await Task.Run(async () =>
+            return await new AsyncLazy<IEnumerable<T>>(async () =>
                                             {
                                                 var list = new List<T>();
+                                                IEnumerable<PropertyInfo> properties;
+                                                var sampleInstance = Activator.CreateInstance<T>();
+                                                var instanceType = sampleInstance.GetType();
+
                                                 while (await dr.ReadAsync(cancellationToken))
                                                 {
                                                     var instance = Activator.CreateInstance<T>();
-                                                    var properties = instance.GetType().GetProperties();
+                                                    properties = localCache.GetOrAdd(instanceType,
+                                                        new Lazy<IEnumerable<PropertyInfo>>(()=>instance.GetType().GetProperties())).Value;
+                                                    
                                                     foreach (PropertyInfo prop in properties.Where(prop => !Equals(dr[prop.Name], DBNull.Value)))
                                                     {
                                                         prop.SetValue(instance, dr[prop.Name], null);
@@ -41,12 +48,12 @@ namespace AsyncORM
                                                     list.Add(instance);
                                                 }
                                                 return list;
-                                            },cancellationToken);
+                                            }, cancellationToken);
         }
 
         public static async Task<IEnumerable<IEnumerable<dynamic>>> ToExpandoMultipleListAsync(this SqlDataReader rdr, CancellationToken cancellationToken)
         {
-            return await Task.Run(async () =>
+            return await new AsyncLazy<IEnumerable<IEnumerable<dynamic>>>(async () =>
                                             {
                                                 var result = new List<List<dynamic>>();
                                                 do
@@ -61,12 +68,12 @@ namespace AsyncORM
                                                 } while (await rdr.NextResultAsync(cancellationToken));
 
                                                 return result;
-                                            },cancellationToken);
+                                            }, cancellationToken);
         }
 
         public static async Task<dynamic> RecordToExpandoAsync(this SqlDataReader rdr, CancellationToken cancellationToken)
         {
-            return await Task.Run(() =>
+            return await new AsyncLazy<dynamic>(() =>
                                       {
                                           dynamic e = new ExpandoObject();
                                           var dataRow = e as IDictionary<string, object>;
@@ -78,7 +85,7 @@ namespace AsyncORM
                                                           DBNull.Value.Equals(dataItem) ? null : dataItem);
                                           }
                                           return e;
-                                      },cancellationToken);
+                                      }, cancellationToken);
         }
     }
 }
