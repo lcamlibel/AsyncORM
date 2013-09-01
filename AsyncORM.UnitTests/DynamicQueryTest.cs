@@ -98,5 +98,15 @@ namespace AsyncORM.UnitTests
 
             Assert.IsTrue(!task.Result.Any());
         }
+        [TestMethod]
+        public async Task Verify_Global_ConnectionString()
+        {
+            AsyncOrmConfig.ConnectionString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync dynamicQuery = new DynamicQuery();
+            IEnumerable<Address> result =
+                           await
+                           dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
+            Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
+        }
     }
 }

@@ -16,7 +16,7 @@ namespace AsyncORM
         {
         }
 
-        public StoredProcedure()
+        public StoredProcedure(): base()
         {
             if (String.IsNullOrEmpty(AsyncOrmConfig.ConnectionString))
                 throw new ArgumentNullException(
@@ -42,10 +42,7 @@ namespace AsyncORM
                     {
                         using (SqlCommand comm = conn.CreateCommand())
                         {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm, cancellationToken, dbParams)
-                                    .ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                                SetupCommand(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,comm,  dbParams);
                             IEnumerable<dynamic> items;
                             using (
                                 SqlDataReader reader =
@@ -58,11 +55,10 @@ namespace AsyncORM
                                     reader.ToExpandoMultipleListAsync(cancellationToken)
                                           .ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                             }
+
                             if (cancellationToken.IsCancellationRequested)
-                            {
-                                trans.Rollback();
                                 throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                            }
+                          
                             trans.Commit();
                             return items.Count() == 1 ? items.ElementAt(0) : items;
                         }
@@ -93,20 +89,16 @@ namespace AsyncORM
                     {
                         using (SqlCommand comm = conn.CreateCommand())
                         {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm, cancellationToken,
-                                                  dbParams).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                                SetupCommand(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,comm, dbParams);
                             IEnumerable<T> items;
                             using (SqlDataReader reader = await comm.ExecuteReaderAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait))
                             {
-                                items = await reader.ToGenericListAsync<T>(cancellationToken, ParameterCache).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                                items = await reader.ToGenericListAsync<T>(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                             }
+
                             if (cancellationToken.IsCancellationRequested)
-                            {
-                                trans.Rollback();
                                 throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                            }
+
                             trans.Commit();
                             return items;
                         }
@@ -135,17 +127,12 @@ namespace AsyncORM
                     {
                         using (SqlCommand comm = conn.CreateCommand())
                         {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm, cancellationToken,
-                                                  dbParams).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                            SetupCommand(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,comm, dbParams);
                             await comm.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                         }
                         if (cancellationToken.IsCancellationRequested)
-                        {
-                            trans.Rollback();
                             throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                        }
+
                         trans.Commit();
                     }
                     catch
@@ -173,17 +160,14 @@ namespace AsyncORM
                         {
                             using (SqlCommand comm = conn.CreateCommand())
                             {
-                                await
-                                    SetupCommandAsync(trans, CommandType.StoredProcedure, setting.CommandText,
-                                                      commandTimeout, comm, cancellationToken, setting.DbParams).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                                SetupCommand(trans, CommandType.StoredProcedure, setting.CommandText, commandTimeout,
+                                             comm, setting.DbParams);
                                 await comm.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                             }
                         }
                         if (cancellationToken.IsCancellationRequested)
-                        {
-                            trans.Rollback();
                             throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                        }
+
                         trans.Commit();
                     }
                     catch
@@ -211,17 +195,12 @@ namespace AsyncORM
                         object data;
                         using (SqlCommand comm = conn.CreateCommand())
                         {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm, cancellationToken,
-                                                  dbParams).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                            SetupCommand(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,comm, dbParams);
                             data = await comm.ExecuteScalarAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                         }
                         if (cancellationToken.IsCancellationRequested)
-                        {
-                            trans.Rollback();
                             throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                        }
+
                         trans.Commit();
                         return data;
                     }
@@ -250,17 +229,12 @@ namespace AsyncORM
                         object data;
                         using (SqlCommand comm = conn.CreateCommand())
                         {
-                            await
-                                SetupCommandAsync(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,
-                                                  comm, cancellationToken,
-                                                  dbParams).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                            SetupCommand(trans, CommandType.StoredProcedure, storedProcedure, commandTimeout,comm, dbParams);
                             data = await comm.ExecuteScalarAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                         }
                         if (cancellationToken.IsCancellationRequested)
-                        {
-                            trans.Rollback();
                             throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                        }
+
                         trans.Commit();
                         try
                         {
@@ -291,10 +265,9 @@ namespace AsyncORM
 
                 using (SqlCommand commandSourceData = sourceConnection.CreateCommand())
                 {
-                    await
-                        SetupCommandAsync(CommandType.StoredProcedure, bulkCopyBulkCopySourceSettings.CommandText,
-                                          bulkCopyBulkCopySourceSettings.Timeout, commandSourceData, cancellationToken,
-                                          bulkCopyBulkCopySourceSettings.Parameters).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+                        SetupCommand(CommandType.StoredProcedure, bulkCopyBulkCopySourceSettings.CommandText,
+                                          bulkCopyBulkCopySourceSettings.Timeout, commandSourceData, 
+                                          bulkCopyBulkCopySourceSettings.Parameters);
 
                     SqlDataReader reader = await commandSourceData.ExecuteReaderAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
 
@@ -320,10 +293,8 @@ namespace AsyncORM
                                     await bulkCopy.WriteToServerAsync(reader, cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
 
                                     if (cancellationToken.IsCancellationRequested)
-                                    {
-                                        transaction.Rollback();
                                         throw new OperationCanceledException("OperationCanceled", cancellationToken);
-                                    }
+
                                     transaction.Commit();
                                 }
                                 catch

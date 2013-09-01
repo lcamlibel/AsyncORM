@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AsyncORM
 {
@@ -16,13 +14,13 @@ namespace AsyncORM
 
         protected readonly string ConnectionString;
 
-        public BaseDatabaseAsync(string connectionString)
+        protected BaseDatabaseAsync(string connectionString)
         {
             var connBuilder = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true};
             ConnectionString = connBuilder.ConnectionString;
         }
 
-        public BaseDatabaseAsync()
+        protected BaseDatabaseAsync()
         {
             var connBuilder = new SqlConnectionStringBuilder(AsyncOrmConfig.ConnectionString)
                                   {
@@ -32,37 +30,29 @@ namespace AsyncORM
             ConnectionString = connBuilder.ConnectionString;
         }
 
-        protected async Task SetupCommandAsync(IDbTransaction transaction, CommandType commandType, string commandText,
-                                               int commandTimeout, IDbCommand comm, CancellationToken cancellationToken,
-                                               object parameters = null)
+        protected void SetupCommand(IDbTransaction transaction, CommandType commandType, string commandText,
+                                    int commandTimeout, IDbCommand comm, object parameters = null)
         {
-            await Task.Run(() =>
-                               {
-                                   comm.CommandType = commandType;
-                                   comm.CommandText = commandText;
-                                   comm.CommandTimeout = commandTimeout;
-                                   comm.Transaction = transaction;
-                                   if (parameters != null)
-                                   {
-                                       PrepareParameters(comm, parameters);
-                                   }
-                               }, cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+            comm.CommandType = commandType;
+            comm.CommandText = commandText;
+            comm.CommandTimeout = commandTimeout;
+            comm.Transaction = transaction;
+            if (parameters != null)
+            {
+                PrepareParameters(comm, parameters);
+            }
         }
 
-        protected async Task SetupCommandAsync(CommandType commandType, string commandText, int commandTimeout,
-                                               IDbCommand comm, CancellationToken cancellationToken,
-                                               object parameters = null)
+        protected void SetupCommand(CommandType commandType, string commandText, int commandTimeout, IDbCommand comm,
+                                    object parameters = null)
         {
-            await Task.Run(() =>
-                               {
-                                   comm.CommandType = commandType;
-                                   comm.CommandText = commandText;
-                                   comm.CommandTimeout = commandTimeout;
-                                   if (parameters != null)
-                                   {
-                                       PrepareParameters(comm, parameters);
-                                   }
-                               }, cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
+            comm.CommandType = commandType;
+            comm.CommandText = commandText;
+            comm.CommandTimeout = commandTimeout;
+            if (parameters != null)
+            {
+                PrepareParameters(comm, parameters);
+            }
         }
 
         private void PrepareParameters(IDbCommand comm, object dbParams)

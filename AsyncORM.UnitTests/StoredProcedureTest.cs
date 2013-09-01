@@ -96,5 +96,15 @@ namespace AsyncORM.UnitTests
             await Task.WhenAll(task);
             Assert.IsTrue(!task.Result.Any());
         }
+        [TestMethod]
+        public async Task Verify_Global_ConnectionString()
+        {
+            AsyncOrmConfig.ConnectionString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync storedProcedure = new StoredProcedure();
+            IEnumerable<Address> result =
+                await
+                storedProcedure.ExecuteAsync<Address>("proc_test3");
+            Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
+        }
     }
 }
