@@ -33,6 +33,7 @@ namespace AsyncORM.UnitTests
                     new {DepartmentId = 8});
             Assert.IsTrue(result.Any());
         }
+
         [TestMethod]
         public async Task ExecuteAsync_Verify_WithParameter()
         {
@@ -42,9 +43,10 @@ namespace AsyncORM.UnitTests
                 await
                 dynamicQuery.ExecuteAsync(
                     "select top 1 * from [HumanResources].[Department] where DepartmentId=@DepartmentId",
-                    new { DepartmentId = 8 });
-            Assert.IsTrue(result.Any(x => x.DepartmentID==8));
+                    new {DepartmentId = 8});
+            Assert.IsTrue(result.Any(x => x.DepartmentID == 8));
         }
+
         [TestMethod]
         public async Task ExecuteAsync_Projection_NoParameter()
         {
@@ -57,6 +59,7 @@ namespace AsyncORM.UnitTests
             var departments = result.Select(x => new {DepartmentId = x.DepartmentID, DeptName = x.Name});
             Assert.IsTrue(departments.Any());
         }
+
         [TestMethod]
         public async Task ExecuteAsync_SingleResultSetAsync_GenericList()
         {
@@ -66,8 +69,8 @@ namespace AsyncORM.UnitTests
                 await
                 dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
             Assert.IsTrue(result.Count() == 10);
-
         }
+
         [TestMethod]
         public async Task ExecuteAsync_Verify_Type()
         {
@@ -75,24 +78,25 @@ namespace AsyncORM.UnitTests
             IQueryAsync dynamicQuery = new DynamicQuery(connString);
             IEnumerable<Address> result =
                 await
-                 dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
-            Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
-
+                dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]");
+            Assert.IsInstanceOfType(result.ElementAt(0), typeof (Address));
         }
+
         [TestMethod]
-        [ExpectedException(typeof(TaskCanceledException))]
+        [ExpectedException(typeof (TaskCanceledException))]
         public async Task ExecuteAsync_CancelationToken()
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             IQueryAsync dynamicQuery = new DynamicQuery(connString);
             var tokenSource = new CancellationTokenSource();
-            var task =dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]",cancellationToken:tokenSource.Token);
-            
+            Task<IEnumerable<Address>> task =
+                dynamicQuery.ExecuteAsync<Address>("select top 10 * from [Person].[Address]",
+                                                   cancellationToken: tokenSource.Token);
+
             tokenSource.Cancel();
             await Task.WhenAll(task);
-            
-            Assert.IsTrue(!task.Result.Any());
 
+            Assert.IsTrue(!task.Result.Any());
         }
     }
 }

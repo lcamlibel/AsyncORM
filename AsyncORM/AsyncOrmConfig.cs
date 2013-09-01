@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AsyncORM
+﻿namespace AsyncORM
 {
-    public class AsyncOrmConfig
+    public static class AsyncOrmConfig
     {
-        public string ConnectionString { get; set; }
+        public static string ConnectionString { get; set; }
+        public static bool ConfigureAwait { get; set; }
+        public static bool EnableParameterCache { get; set; }
+
+        static AsyncOrmConfig()
+        {
+            EnableParameterCache = true;
+            ConfigureAwait = false;
+        }
     }
 }

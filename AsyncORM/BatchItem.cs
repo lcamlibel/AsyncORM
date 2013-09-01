@@ -1,6 +1,4 @@
-﻿
-
-using AsyncORM.interfaces;
+﻿using AsyncORM.interfaces;
 
 namespace AsyncORM
 {
