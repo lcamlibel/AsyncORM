@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace AsyncORM
+namespace AsyncORM.Extensions
 {
     internal static class DataReaderExtensions
     {
@@ -25,7 +25,7 @@ namespace AsyncORM
                 if (AsyncOrmConfig.EnableParameterCache)
                 {
                     properties =
-                        BaseDatabaseAsync.ParameterCache.GetOrAdd(instanceType,
+                        CacheManager.ParameterCache.GetOrAdd(instanceType,
                                                                   new Lazy<IEnumerable<PropertyInfo>>(
                                                                       () => instance.GetType().GetProperties())).Value;
                 }

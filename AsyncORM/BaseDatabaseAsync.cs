@@ -9,8 +9,6 @@ namespace AsyncORM
 {
     public class BaseDatabaseAsync
     {
-        internal static ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>> ParameterCache =
-            new ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>>();
 
         protected readonly string ConnectionString;
 

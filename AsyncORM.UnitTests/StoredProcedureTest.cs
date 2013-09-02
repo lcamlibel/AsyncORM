@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
+using System.Dynamic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,10 @@ namespace AsyncORM.UnitTests
         public string AddressLine2 { get; set; }
         public string City { get; set; }
         public string PostalCode { get; set; }
+    }
+    public class AddressExtra:Address
+    {
+        public string Country { get; set; }
     }
 
     [TestClass]
@@ -104,7 +109,50 @@ namespace AsyncORM.UnitTests
             IEnumerable<Address> result =
                 await
                 storedProcedure.ExecuteAsync<Address>("proc_test3");
+            
             Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
         }
+
+        [TestMethod]
+        public async Task ExecuteAsync_MapDynamicToObject()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync storedProcedure = new StoredProcedure(connString);
+            IEnumerable<dynamic> result =
+                await
+                storedProcedure.ExecuteAsync("proc_test3");
+            var items = result.MapFromTo<ExpandoObject,Address>();
+            
+            Assert.AreEqual(result.Count(),items.Count());
+            Assert.AreEqual(result.ElementAt(0).AddressID, items.ElementAt(0).AddressID);
+        }
+        [TestMethod]
+        public async Task ExecuteAsync_MapObjectToObject()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync storedProcedure = new StoredProcedure(connString);
+            IEnumerable<Address> result =
+                 await
+                 storedProcedure.ExecuteAsync<Address>("proc_test3");
+            var items = result.MapFromTo<Address,AddressExtra>();
+            
+            Assert.AreEqual(result.Count(), items.Count());
+            Assert.AreEqual(result.ElementAt(0).AddressID, items.ElementAt(0).AddressID);
+            Assert.IsNull(items.ElementAt(0).Country);
+        }
+        [TestMethod]
+        public async Task ExecuteAsync_MapObjectToDynamic()
+        {
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync storedProcedure = new StoredProcedure(connString);
+            IEnumerable<Address> result =
+                 await
+                 storedProcedure.ExecuteAsync<Address>("proc_test3");
+            IEnumerable<dynamic> items = result.MapFromTo<Address, ExpandoObject>();
+
+            Assert.AreEqual(result.Count(), items.Count());
+            Assert.AreEqual(result.ElementAt(0).AddressID, items.ElementAt(0).AddressID);
+        }
+
     }
 }

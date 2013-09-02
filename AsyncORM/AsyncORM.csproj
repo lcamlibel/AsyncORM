@@ -43,8 +43,10 @@
     <Compile Include="AsyncOrmConfig.cs" />
     <Compile Include="BaseDatabaseAsync.cs" />
     <Compile Include="BatchItem.cs" />
-    <Compile Include="DataReaderAsyncExtensions.cs" />
+    <Compile Include="CacheManager.cs" />
+    <Compile Include="Extensions\DataReaderAsyncExtensions.cs" />
     <Compile Include="BulkCopyDestinationSetting.cs" />
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="PrimaryKey.cs" />
     <Compile Include="TableSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
