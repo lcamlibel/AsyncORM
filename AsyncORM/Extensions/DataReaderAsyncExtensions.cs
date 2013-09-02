@@ -11,6 +11,7 @@ namespace AsyncORM.Extensions
 {
     internal static class DataReaderExtensions
     {
+        
         internal static async Task<IEnumerable<T>> ToGenericListAsync<T>(this SqlDataReader dr,
                                                                          CancellationToken cancellationToken)
         {
@@ -36,7 +37,9 @@ namespace AsyncORM.Extensions
                 foreach (PropertyInfo prop in
                     properties.Where(prop => !Equals(dr[prop.Name], DBNull.Value)))
                 {
-                    prop.SetValue(instance, dr[prop.Name], null);
+                    Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
+                    setAccessor(instance, dr[prop.Name]);
+                   // prop.SetValue(instance, dr[prop.Name], null);
                 }
                 generatedGenericObjects.Add(instance);
             }

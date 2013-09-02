@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Reflection;
+using AsyncORM.Extensions;
 
 namespace AsyncORM
 {
@@ -74,8 +75,10 @@ namespace AsyncORM
                 foreach (PropertyInfo destinationProp in destinationProps)
                     if ((sourceProp.Name.Equals(destinationProp.Name, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        object sourceVal = sourceProp.GetValue(sourceInstance, null);
-                        destinationProp.SetValue(destinationInstance, sourceVal, null);
+                        var getAccessor = ReflectionHelper.BuildGetAccessor(sourceProp.GetGetMethod());
+                        var setAccessor = ReflectionHelper.BuildSetAccessor(destinationProp.GetSetMethod());
+
+                        setAccessor(destinationInstance, getAccessor(sourceInstance));
                         break;
                     }
             }
@@ -91,7 +94,9 @@ namespace AsyncORM
                 foreach (PropertyInfo destinationProp in destinationProps)
                     if ((sourceProp.Key.Equals(destinationProp.Name, StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        destinationProp.SetValue(destinationInstance, sourceProp.Value, null);
+                        var setAccessor = ReflectionHelper.BuildSetAccessor(destinationProp.GetSetMethod());
+
+                        setAccessor(destinationInstance, sourceProp.Value);
                         break;
                     }
             }
@@ -106,8 +111,9 @@ namespace AsyncORM
 
             foreach (PropertyInfo sourceProp in sourceProps)
             {
-                object sourceVal = sourceProp.GetValue(sourceInstance, null);
-                destinationInstance.Add(sourceProp.Name, sourceVal);
+                var getAccessor = ReflectionHelper.BuildGetAccessor(sourceProp.GetGetMethod());
+              
+                destinationInstance.Add(sourceProp.Name, getAccessor(sourceInstance));
                 break;
             }
             return destination;

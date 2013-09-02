@@ -47,6 +47,7 @@
     <Compile Include="Extensions\DataReaderAsyncExtensions.cs" />
     <Compile Include="BulkCopyDestinationSetting.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
+    <Compile Include="Extensions\ReflectionHelper.cs" />
     <Compile Include="PrimaryKey.cs" />
     <Compile Include="TableSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
