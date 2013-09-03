@@ -8,38 +8,32 @@ namespace AsyncORM.interfaces
 {
     public interface IQueryAsync
     {
-        Task<IEnumerable<dynamic>> ExecuteAsync(string commandText,
-                                                object dbParams = null,
+        Task<IEnumerable<dynamic>> ExecuteAsync(string commandText, object dbParams = null,
                                                 IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                                 int commandTimeout = 30,
                                                 CancellationToken cancellationToken = default(CancellationToken));
 
 
-        Task<IEnumerable<T>> ExecuteAsync<T>(string commandText,
-                                             object dbParams = null,
+        Task<IEnumerable<T>> ExecuteAsync<T>(string commandText, object dbParams = null,
                                              IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                              int commandTimeout = 30,
                                              CancellationToken cancellationToken = default(CancellationToken));
 
 
-        Task ExecuteNonQueryAsync(string commandText,
-                                  object dbParams = null, IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-                                  int commandTimeout = 30,
+        Task ExecuteNonQueryAsync(string commandText, object dbParams = null,
+                                  IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, int commandTimeout = 30,
                                   CancellationToken cancellationToken = default(CancellationToken));
 
         Task ExecuteNonQueryAsync(IEnumerable<IBatchItem> batchItems,
-                                  IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
-                                  int commandTimeout = 30,
+                                  IsolationLevel isolationLevel = IsolationLevel.ReadCommitted, int commandTimeout = 30,
                                   CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<object> ExecuteScalarAsync(string commandText,
-                                        object dbParams = null,
+        Task<object> ExecuteScalarAsync(string commandText, object dbParams = null,
                                         IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                         int commandTimeout = 30,
                                         CancellationToken cancellationToken = default(CancellationToken));
 
-        Task<T> ExecuteScalarAsync<T>(string commandText,
-                                      object dbParams = null,
+        Task<T> ExecuteScalarAsync<T>(string commandText, object dbParams = null,
                                       IsolationLevel isolationLevel = IsolationLevel.ReadCommitted,
                                       int commandTimeout = 30,
                                       CancellationToken cancellationToken = default(CancellationToken));

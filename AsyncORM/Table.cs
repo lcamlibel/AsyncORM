@@ -16,6 +16,7 @@ namespace AsyncORM
         {
             _connectionString = connectionString;
         }
+
         public Table()
         {
             if (String.IsNullOrEmpty(AsyncOrmConfig.ConnectionString))
@@ -23,6 +24,7 @@ namespace AsyncORM
                     "please setup global connectionstring use the following: AsyncOrmConfig.ConnectionString");
             _connectionString = AsyncOrmConfig.ConnectionString;
         }
+
         public async Task<dynamic> InsertAsync(dynamic entity, TableSetting tableSetting,
                                                CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -66,16 +68,14 @@ namespace AsyncORM
         {
             if (String.IsNullOrWhiteSpace(where) && !tableSetting.PrimaryKeys.Any())
             {
-                throw new ArgumentException(
-                    "No primary key or where statement found. please provide at least one");
+                throw new ArgumentException("No primary key or where statement found. please provide at least one");
             }
             if (String.IsNullOrWhiteSpace(tableSetting.TableName))
                 throw new ArgumentException("Table name cannot be empty.");
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string updateStatement =
-                await PrepareUpdateStatementAsync(tableSetting, entity, where, cancellationToken);
+            string updateStatement = await PrepareUpdateStatementAsync(tableSetting, entity, where, cancellationToken);
             IQueryAsync query = new DynamicQuery(_connectionString);
             await query.ExecuteNonQueryAsync(updateStatement, entity, cancellationToken: cancellationToken);
         }
@@ -85,21 +85,16 @@ namespace AsyncORM
         {
             if (String.IsNullOrWhiteSpace(where) && !tableSetting.PrimaryKeys.Any())
             {
-                throw new ArgumentException(
-                    "No primary key or where statement found. please provide at least one");
+                throw new ArgumentException("No primary key or where statement found. please provide at least one");
             }
             if (String.IsNullOrWhiteSpace(tableSetting.TableName))
                 throw new ArgumentException("Table name cannot be empty.");
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string deleteStatement =
-                await
-                PrepareDeleteStatementAsync(tableSetting, where, cancellationToken);
+            string deleteStatement = await PrepareDeleteStatementAsync(tableSetting, where, cancellationToken);
             IQueryAsync query = new DynamicQuery(_connectionString);
-            await
-                query.ExecuteNonQueryAsync(deleteStatement, entity,
-                                           cancellationToken: cancellationToken);
+            await query.ExecuteNonQueryAsync(deleteStatement, entity, cancellationToken: cancellationToken);
         }
 
         public async Task<T> InsertAsync<T>(dynamic entity, TableSetting tableSetting,
@@ -224,8 +219,7 @@ namespace AsyncORM
                                                        foreach (IPrimaryKey primaryKey in tableSetting.PrimaryKeys)
                                                        {
                                                            queryBuilder.Replace(
-                                                               String.Format("{0}=@{0},", primaryKey.Name),
-                                                               string.Empty);
+                                                               String.Format("{0}=@{0},", primaryKey.Name), string.Empty);
                                                            queryBuilder.AppendFormat("{0}=@{0} &&", primaryKey.Name);
                                                        }
                                                        return queryBuilder.ToString().TrimEnd('&');

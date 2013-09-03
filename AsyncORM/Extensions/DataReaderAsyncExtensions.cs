@@ -11,7 +11,6 @@ namespace AsyncORM.Extensions
 {
     internal static class DataReaderExtensions
     {
-        
         internal static async Task<IEnumerable<T>> ToGenericListAsync<T>(this SqlDataReader dr,
                                                                          CancellationToken cancellationToken)
         {
@@ -27,8 +26,8 @@ namespace AsyncORM.Extensions
                 {
                     properties =
                         CacheManager.ParameterCache.GetOrAdd(instanceType,
-                                                                  new Lazy<IEnumerable<PropertyInfo>>(
-                                                                      () => instance.GetType().GetProperties())).Value;
+                                                             new Lazy<IEnumerable<PropertyInfo>>(
+                                                                 () => instance.GetType().GetProperties())).Value;
                 }
                 else
                 {
@@ -39,7 +38,7 @@ namespace AsyncORM.Extensions
                 {
                     Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
                     setAccessor(instance, dr[prop.Name]);
-                   // prop.SetValue(instance, dr[prop.Name], null);
+                    // prop.SetValue(instance, dr[prop.Name], null);
                 }
                 generatedGenericObjects.Add(instance);
             }

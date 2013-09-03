@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
 
 namespace AsyncORM
 {
-    public class BaseDatabaseAsync
+    public abstract class BaseDatabaseAsync
     {
-
         protected readonly string ConnectionString;
 
         protected BaseDatabaseAsync(string connectionString)

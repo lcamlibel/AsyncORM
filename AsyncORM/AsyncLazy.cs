@@ -13,7 +13,7 @@ namespace AsyncORM
         {
             _lazyInstance = new Lazy<Task<T>>(() =>
                                                   {
-                                                      var task = Task.Run(factory, cancellationToken);
+                                                      Task<T> task = Task.Run(factory, cancellationToken);
                                                       task.ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                                                       return task;
                                                   });
@@ -22,8 +22,8 @@ namespace AsyncORM
         public AsyncLazy(Func<Task<T>> factory, CancellationToken cancellationToken)
         {
             _lazyInstance = new Lazy<Task<T>>(() =>
-                                                  { 
-                                                      var task = Task.Run(factory, cancellationToken);
+                                                  {
+                                                      Task<T> task = Task.Run(factory, cancellationToken);
                                                       task.ConfigureAwait(AsyncOrmConfig.ConfigureAwait);
                                                       return task;
                                                   });
