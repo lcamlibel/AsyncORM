@@ -39,11 +39,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AsyncLazy.cs" />
+    <Compile Include="Library\AsyncLazy.cs" />
     <Compile Include="AsyncOrmConfig.cs" />
+    <Compile Include="Attributes\AsyncColumnMapAttribute.cs" />
     <Compile Include="BaseDatabaseAsync.cs" />
     <Compile Include="BatchItem.cs" />
-    <Compile Include="CacheManager.cs" />
+    <Compile Include="Library\CacheManager.cs" />
     <Compile Include="Extensions\DataReaderAsyncExtensions.cs" />
     <Compile Include="BulkCopyDestinationSetting.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />

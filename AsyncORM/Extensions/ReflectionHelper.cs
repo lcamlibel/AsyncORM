@@ -3,27 +3,40 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
-
+using System.Linq;
+using System.Runtime.CompilerServices;
 namespace AsyncORM.Extensions
 {
     internal static class ReflectionHelper
     {
+
+        internal static bool IsAnonymousType(this Type type)
+        {
+            bool hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Count() > 0;
+            bool nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
+            return hasCompilerGeneratedAttribute && nameContainsAnonymousType;
+        }
+        internal static bool IsDynamicType(this object type)
+        {
+            return type is IDynamicMetaObjectProvider || type is IDictionary<string, Object>;
+        }
+
         internal static Func<object, object> BuildGetAccessor(MethodInfo method)
         {
-            ParameterExpression obj = Expression.Parameter(typeof (object), "o");
+            ParameterExpression obj = Expression.Parameter(typeof(object), "o");
 
             Expression<Func<object, object>> expr =
                 Expression.Lambda<Func<object, object>>(
                     Expression.Convert(Expression.Call(Expression.Convert(obj, method.DeclaringType), method),
-                                       typeof (object)), obj);
+                                       typeof(object)), obj);
 
             return expr.Compile();
         }
 
         internal static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
-            ParameterExpression obj = Expression.Parameter(typeof (object), "o");
-            ParameterExpression value = Expression.Parameter(typeof (object));
+            ParameterExpression obj = Expression.Parameter(typeof(object), "o");
+            ParameterExpression value = Expression.Parameter(typeof(object));
 
             Expression<Action<object, object>> expr =
                 Expression.Lambda<Action<object, object>>(
@@ -31,6 +44,22 @@ namespace AsyncORM.Extensions
                                     Expression.Convert(value, method.GetParameters()[0].ParameterType)), obj, value);
 
             return expr.Compile();
+        }
+        internal static AsyncColumnMapAttribute GetAttribute(MemberInfo memberInfo, bool isDynamic)
+        {
+            if (isDynamic) return null;
+            AsyncColumnMapAttribute attr;
+            if (AsyncOrmConfig.EnableParameterCache)
+            {
+                attr =
+                    CacheManager.AttributeCache.GetOrAdd(memberInfo, memberInfo.GetCustomAttribute<AsyncColumnMapAttribute>(false));
+            }
+            else
+            {
+                attr = memberInfo.GetCustomAttribute<AsyncColumnMapAttribute>(false);
+            }
+
+            return attr;
         }
         internal static IEnumerable<PropertyInfo> GetProperties(bool isDynamic, Type type, object instance)
         {

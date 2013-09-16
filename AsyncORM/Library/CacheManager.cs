@@ -9,5 +9,7 @@ namespace AsyncORM
     {
         internal static ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>> ParameterCache =
             new ConcurrentDictionary<Type, Lazy<IEnumerable<PropertyInfo>>>();
+        internal static ConcurrentDictionary<MemberInfo, AsyncColumnMapAttribute> AttributeCache =
+            new ConcurrentDictionary<MemberInfo, AsyncColumnMapAttribute>();
     }
 }

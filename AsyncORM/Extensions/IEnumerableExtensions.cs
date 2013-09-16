@@ -16,10 +16,10 @@ namespace AsyncORM
 
             Type sourceType = sourceInstanceSample.GetType();
             Type destinationType = destinationInstanceSample.GetType();
-            bool isSourceDynamic = (sourceInstanceSample as IDictionary<String, Object>) != null;
-            bool isDestinationDynamic = (destinationInstanceSample as IDictionary<String, Object>) != null;
+            bool isSourceDynamic = sourceInstanceSample.IsDynamicType();// is IDictionary<String, Object>;
+            bool isDestinationDynamic = destinationInstanceSample.IsDynamicType();// is IDictionary<String, Object>;
 
-
+            
             foreach (TSource sourceInstance in sourceEnumerable)
             {
                 if (!isSourceDynamic && !isDestinationDynamic)

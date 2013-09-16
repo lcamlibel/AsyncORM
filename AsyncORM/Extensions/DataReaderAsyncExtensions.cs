@@ -38,7 +38,7 @@ namespace AsyncORM.Extensions
                 {
                     Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
                     setAccessor(instance, dr[prop.Name]);
-                    // prop.SetValue(instance, dr[prop.Name], null);
+                   
                 }
                 generatedGenericObjects.Add(instance);
             }
