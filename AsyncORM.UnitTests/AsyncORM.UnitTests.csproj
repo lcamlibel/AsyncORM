@@ -57,6 +57,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StoredProcedureTest.cs" />
     <Compile Include="TableTest.cs" />
+    <Compile Include="QueryAsyncFactoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AsyncORM\AsyncORM.csproj">

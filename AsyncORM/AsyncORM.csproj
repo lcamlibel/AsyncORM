@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="interfaces\IQueryAsyncFactory.cs" />
     <Compile Include="Library\AsyncLazy.cs" />
     <Compile Include="AsyncOrmConfig.cs" />
     <Compile Include="Attributes\AsyncColumnMapAttribute.cs" />
@@ -49,7 +50,9 @@
     <Compile Include="BulkCopyDestinationSetting.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\ReflectionHelper.cs" />
+    <Compile Include="Library\QueryAsyncType.cs" />
     <Compile Include="PrimaryKey.cs" />
+    <Compile Include="QueryAsyncFactory.cs" />
     <Compile Include="TableSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
     <Compile Include="interfaces\IBatchItem.cs" />

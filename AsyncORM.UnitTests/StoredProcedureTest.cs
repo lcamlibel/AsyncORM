@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AsyncORM.interfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Data.SqlClient;
 
 namespace AsyncORM.UnitTests
 {
@@ -88,7 +89,7 @@ namespace AsyncORM.UnitTests
         }
 
         [TestMethod]
-        [ExpectedException(typeof (TaskCanceledException))]
+        [ExpectedException(typeof (TaskCanceledException))]        
         public async Task ExecuteAsync_CancelationToken()
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
