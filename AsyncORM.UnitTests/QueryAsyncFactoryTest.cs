@@ -21,7 +21,7 @@ namespace AsyncORM.UnitTests
         {
             QueryAsyncFactory factory = new QueryAsyncFactory();
              string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
-             var query = factory.Create(Library.QueryAsyncType.DynamicQuery, connString);
+             IQueryAsync query = factory.Create(Library.QueryAsyncType.DynamicQuery, connString);
              Assert.IsInstanceOfType(query, typeof(IQueryAsync));
         }
         [TestMethod]
@@ -29,7 +29,20 @@ namespace AsyncORM.UnitTests
         {
             QueryAsyncFactory factory = new QueryAsyncFactory();
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
-            var query = factory.Create(Library.QueryAsyncType.StoredProcedure, connString);
+            IQueryAsync query = factory.Create(Library.QueryAsyncType.StoredProcedure, connString);
+            Assert.IsInstanceOfType(query, typeof(IQueryAsync));
+        }
+        public void QueryAsyncFactory_Instance_DynamicQueryVerify()
+        {            
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync query = QueryAsyncFactory.Instance.Create(Library.QueryAsyncType.DynamicQuery, connString);
+            Assert.IsInstanceOfType(query, typeof(IQueryAsync));
+        }
+        [TestMethod]
+        public void QueryAsyncFactory_Intance_StoredProcedureVerify()
+        {            
+            string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
+            IQueryAsync query = QueryAsyncFactory.Instance.Create(Library.QueryAsyncType.StoredProcedure, connString);
             Assert.IsInstanceOfType(query, typeof(IQueryAsync));
         }
         [TestMethod]
@@ -43,8 +56,8 @@ namespace AsyncORM.UnitTests
         [TestMethod]
         public void QueryAsyncFactory_StoredProcedure_With_GlobalConfiguration_Verify()
         {
-            QueryAsyncFactory factory = new QueryAsyncFactory();            
-            var query = factory.Create(Library.QueryAsyncType.StoredProcedure);
+            QueryAsyncFactory factory = new QueryAsyncFactory();
+            IQueryAsync query = factory.Create(Library.QueryAsyncType.StoredProcedure);
             Assert.IsInstanceOfType(query, typeof(IQueryAsync));
         }
         [TestMethod]
@@ -52,7 +65,7 @@ namespace AsyncORM.UnitTests
         {
             QueryAsyncFactory factory = new QueryAsyncFactory();
 
-            var dynamicQuery = factory.Create(Library.QueryAsyncType.DynamicQuery);
+            IQueryAsync dynamicQuery = factory.Create(Library.QueryAsyncType.DynamicQuery);
             IEnumerable<dynamic> result =
                await dynamicQuery.ExecuteAsync("select top 1 * from [HumanResources].[Department]");
             Assert.IsTrue(result.Any());
@@ -60,8 +73,8 @@ namespace AsyncORM.UnitTests
         [TestMethod]
         public async Task QueryAsyncFactory_StoredProcedure_Run()
         {
-            QueryAsyncFactory factory = new QueryAsyncFactory();
-            var storedProcedure = factory.Create(Library.QueryAsyncType.StoredProcedure);
+            IQueryAsyncFactory factory = new QueryAsyncFactory();
+            IQueryAsync storedProcedure = factory.Create(Library.QueryAsyncType.StoredProcedure);
             IEnumerable<dynamic> result =
                   await
                   storedProcedure.ExecuteAsync("proc_test2");
