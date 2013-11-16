@@ -10,7 +10,7 @@ using AsyncORM.interfaces;
 
 namespace AsyncORM
 {
-    public class StoredProcedure : BaseDatabaseAsync, IQueryAsync
+    public class StoredProcedure : BaseDatabaseAsync, IStoredProcedure
     {
         public StoredProcedure(string connectionString) : base(connectionString)
         {

@@ -10,7 +10,7 @@ using AsyncORM.interfaces;
 
 namespace AsyncORM
 {
-    public class DynamicQuery : BaseDatabaseAsync, IQueryAsync
+    public class DynamicQuery : BaseDatabaseAsync, IDynamicQuery
     {
         public DynamicQuery(string connectionString) : base(connectionString)
         {

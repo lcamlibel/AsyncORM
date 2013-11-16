@@ -39,7 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="interfaces\IDynamicQuery.cs" />
     <Compile Include="interfaces\IQueryAsyncFactory.cs" />
+    <Compile Include="interfaces\IStoredProcedure.cs" />
     <Compile Include="Library\AsyncLazy.cs" />
     <Compile Include="AsyncOrmConfig.cs" />
     <Compile Include="Attributes\AsyncColumnMapAttribute.cs" />
