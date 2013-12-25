@@ -109,7 +109,7 @@ namespace AsyncORM.UnitTests
             Assert.IsInstanceOfType(result.ElementAt(0), typeof(Address));
         }
         [TestMethod]
-        public async Task StoredProcedure_Verify_Interfaces()
+        public void StoredProcedure_Verify_Interfaces()
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             IQueryAsync dynamicQuery = new DynamicQuery(connString);

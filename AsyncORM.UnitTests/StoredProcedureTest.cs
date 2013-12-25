@@ -155,7 +155,7 @@ namespace AsyncORM.UnitTests
             Assert.AreEqual(result.ElementAt(0).AddressID, items.ElementAt(0).AddressID);
         }
         [TestMethod]
-        public async Task StoredProcedure_Verify_Interfaces()
+        public  void StoredProcedure_Verify_Interfaces()
         {
             string connString = ConfigurationManager.ConnectionStrings["test"].ConnectionString;
             IQueryAsync storedProcedure = new StoredProcedure(connString);
