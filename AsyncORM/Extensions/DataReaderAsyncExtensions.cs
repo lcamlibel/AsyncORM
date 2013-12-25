@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Dynamic;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace AsyncORM.Extensions
             var generatedGenericObjects = new List<T>();
             var sampleInstance = Activator.CreateInstance<T>();
             Type instanceType = sampleInstance.GetType();
-
+            var columnNames = dr.Columns();
             while (await dr.ReadAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait))
             {
                 var instance = Activator.CreateInstance<T>();
@@ -34,7 +35,7 @@ namespace AsyncORM.Extensions
                     properties = instance.GetType().GetProperties();
                 }
                 foreach (PropertyInfo prop in
-                    properties.Where(prop => !Equals(dr[prop.Name], DBNull.Value)))
+                    properties.Where(prop => columnNames.Any(x=>x.Equals(prop.Name,StringComparison.InvariantCultureIgnoreCase)) && !Equals(dr[prop.Name], DBNull.Value)))
                 {
                     Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
                     setAccessor(instance, dr[prop.Name]);
@@ -44,7 +45,25 @@ namespace AsyncORM.Extensions
             }
             return generatedGenericObjects;
         }
-
+        public static IEnumerable<string> Columns(this SqlDataReader dr)
+        {
+            var columnNames = new List<string>();
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+               columnNames.Add(dr.GetName(i));
+                   
+            }
+            return columnNames;
+        }
+        public static bool HasColumn(this SqlDataReader dr, string columnName)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (dr.GetName(i).Equals(columnName, StringComparison.InvariantCultureIgnoreCase))
+                    return true;
+            }
+            return false;
+        }
         internal static async Task<IEnumerable<IEnumerable<dynamic>>> ToExpandoMultipleListAsync(this SqlDataReader rdr,
                                                                                                  CancellationToken
                                                                                                      cancellationToken)
