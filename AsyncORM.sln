@@ -1,9 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.21005.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM", "AsyncORM\AsyncORM.csproj", "{2E919595-F915-4B8F-ABC9-24B65CA82CE5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM.UnitTests", "AsyncORM.UnitTests\AsyncORM.UnitTests.csproj", "{0C8E25CD-9904-4A97-806D-56745B2083E5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM.MySql", "AsyncORM.MySql\AsyncORM.MySql.csproj", "{2CF0CCB9-47AF-44FB-8778-47314DB3C0DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsyncORM.MySql.UnitTests", "AsyncORM.MySql.UnitTests\AsyncORM.MySql.UnitTests.csproj", "{3C110890-3484-44E2-A2DF-637F46582B0F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +25,14 @@ Global
 		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C8E25CD-9904-4A97-806D-56745B2083E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2CF0CCB9-47AF-44FB-8778-47314DB3C0DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2CF0CCB9-47AF-44FB-8778-47314DB3C0DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2CF0CCB9-47AF-44FB-8778-47314DB3C0DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2CF0CCB9-47AF-44FB-8778-47314DB3C0DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3C110890-3484-44E2-A2DF-637F46582B0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3C110890-3484-44E2-A2DF-637F46582B0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3C110890-3484-44E2-A2DF-637F46582B0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3C110890-3484-44E2-A2DF-637F46582B0F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

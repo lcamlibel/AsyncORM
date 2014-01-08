@@ -1,30 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using AsyncORM.MySql.Library;
+using MySql.Data.MySqlClient;
 
-namespace AsyncORM.Extensions
+namespace AsyncORM.MySql.Extensions
 {
     internal static class DataReaderExtensions
     {
-        internal static async Task<IEnumerable<T>> ToGenericListAsync<T>(this SqlDataReader dr,
+        internal static async Task<IEnumerable<T>> ToGenericListAsync<T>(this DbDataReader dr,
                                                                          CancellationToken cancellationToken)
         {
             var generatedGenericObjects = new List<T>();
             var sampleInstance = Activator.CreateInstance<T>();
             Type instanceType = sampleInstance.GetType();
             var columnNames = dr.Columns();
-            while (await dr.ReadAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait))
+            while (await dr.ReadAsync(cancellationToken).ConfigureAwait(MySqlAsyncOrmConfig.ConfigureAwait))
             {
                 var instance = Activator.CreateInstance<T>();
                 IEnumerable<PropertyInfo> properties;
-                if (AsyncOrmConfig.EnableParameterCache)
+                if (MySqlAsyncOrmConfig.EnableParameterCache)
                 {
                     properties =
                         CacheManager.ParameterCache.GetOrAdd(instanceType,
@@ -39,15 +39,15 @@ namespace AsyncORM.Extensions
                     properties.Where(prop => columnNames.Any(x=>x.Equals(prop.Name,StringComparison.InvariantCultureIgnoreCase)) && !Equals(dr[prop.Name], DBNull.Value)))
                 {
                     prop.SetValue(instance, dr[prop.Name]);
-//                    Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
-//                    setAccessor(instance, dr[prop.Name]);
+                  //  Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
+                   // setAccessor(instance, dr[prop.Name]);
                    
                 }
                 generatedGenericObjects.Add(instance);
             }
             return generatedGenericObjects;
         }
-        public static IEnumerable<string> Columns(this SqlDataReader dr)
+        public static IEnumerable<string> Columns(this DbDataReader dr)
         {
             var columnNames = new List<string>();
             for (int i = 0; i < dr.FieldCount; i++)
@@ -57,7 +57,7 @@ namespace AsyncORM.Extensions
             }
             return columnNames;
         }
-        public static bool HasColumn(this SqlDataReader dr, string columnName)
+        public static bool HasColumn(this MySqlDataReader dr, string columnName)
         {
             for (int i = 0; i < dr.FieldCount; i++)
             {
@@ -66,7 +66,7 @@ namespace AsyncORM.Extensions
             }
             return false;
         }
-        internal static async Task<IEnumerable<IEnumerable<dynamic>>> ToExpandoMultipleListAsync(this SqlDataReader rdr,
+        internal static async Task<IEnumerable<IEnumerable<dynamic>>> ToExpandoMultipleListAsync(this DbDataReader rdr,
                                                                                                  CancellationToken
                                                                                                      cancellationToken)
         {
@@ -74,18 +74,18 @@ namespace AsyncORM.Extensions
             do
             {
                 var generatedDynamicObjects = new List<dynamic>();
-                while (await rdr.ReadAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait))
+                while (await rdr.ReadAsync(cancellationToken).ConfigureAwait(MySqlAsyncOrmConfig.ConfigureAwait))
                 {
                     generatedDynamicObjects.Add(rdr.RecordToExpando());
                 }
                 if (generatedDynamicObjects.Count > 0)
                     result.Add(generatedDynamicObjects);
-            } while (await rdr.NextResultAsync(cancellationToken).ConfigureAwait(AsyncOrmConfig.ConfigureAwait));
+            } while (await rdr.NextResultAsync(cancellationToken).ConfigureAwait(MySqlAsyncOrmConfig.ConfigureAwait));
 
             return result;
         }
 
-        private static dynamic RecordToExpando(this SqlDataReader rdr)
+        private static dynamic RecordToExpando(this DbDataReader rdr)
         {
             dynamic expandoObject = new ExpandoObject();
             var dataRow = expandoObject as IDictionary<string, object>;
