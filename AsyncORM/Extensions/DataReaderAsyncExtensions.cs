@@ -38,7 +38,8 @@ namespace AsyncORM.Extensions
                 foreach (PropertyInfo prop in
                     properties.Where(prop => columnNames.Any(x=>x.Equals(prop.Name,StringComparison.InvariantCultureIgnoreCase)) && !Equals(dr[prop.Name], DBNull.Value)))
                 {
-                    prop.SetValue(instance, dr[prop.Name]);
+                    ReflectionHelper.SetValue(instance, prop, dr[prop.Name]);
+                   // prop.SetValue(instance, dr[prop.Name]);
 //                    Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
 //                    setAccessor(instance, dr[prop.Name]);
                    

@@ -131,5 +131,16 @@ namespace AsyncORM.Extensions
             }
             return destination;
         }
+        public static void SetValue(object inputObject, PropertyInfo propertyInfo, object propertyVal)
+        {
+            Type propertyType = propertyInfo.PropertyType;
+            var targetType = IsNullableType(propertyType) ? Nullable.GetUnderlyingType(propertyType) : propertyInfo.PropertyType;
+            propertyVal = Convert.ChangeType(propertyVal, targetType);
+            propertyInfo.SetValue(inputObject, propertyVal, null);
+        }
+        private static bool IsNullableType(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>);
+        }
     }
 }
