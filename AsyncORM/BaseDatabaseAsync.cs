@@ -8,7 +8,7 @@ namespace AsyncORM
     public abstract class BaseDatabaseAsync
     {
         protected readonly string ConnectionString;
-
+        protected  CommandType CommandType;
         protected BaseDatabaseAsync(string connectionString)
         {
             var connBuilder = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true};

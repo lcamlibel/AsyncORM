@@ -54,6 +54,7 @@
     <Compile Include="Extensions\ReflectionHelper.cs" />
     <Compile Include="Library\QueryAsyncType.cs" />
     <Compile Include="PrimaryKey.cs" />
+    <Compile Include="QueryAsync.cs" />
     <Compile Include="QueryAsyncFactory.cs" />
     <Compile Include="TableSetting.cs" />
     <Compile Include="DynamicQuery.cs" />
