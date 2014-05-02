@@ -18,13 +18,12 @@ namespace AsyncORM
     {
         protected QueryAsync(string connectionString) : base(connectionString)
         {
-            CommandType = CommandType.Text;
+            
         }
 
         protected QueryAsync()
         {
-            CommandType = CommandType.Text;
-            if (String.IsNullOrEmpty(AsyncOrmConfig.ConnectionString))
+           if (String.IsNullOrEmpty(AsyncOrmConfig.ConnectionString))
                 throw new ArgumentNullException("please setup global connectionstring use the following: AsyncOrmConfig.ConnectionString");
         }
 
