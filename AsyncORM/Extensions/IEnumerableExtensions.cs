@@ -9,7 +9,8 @@ namespace AsyncORM
     public static class IEnumerableExtensions
     {
         public static IEnumerable<TResult> MapFromTo<TSource, TResult>(this IEnumerable sourceEnumerable)
-            where TSource : class, new() where TResult : class, new()
+            where TSource : class, new()
+            where TResult : class, new()
         {
             var sourceInstanceSample = Activator.CreateInstance<TSource>();
             var destinationInstanceSample = Activator.CreateInstance<TResult>();
@@ -19,7 +20,7 @@ namespace AsyncORM
             bool isSourceDynamic = sourceInstanceSample.IsDynamicType();// is IDictionary<String, Object>;
             bool isDestinationDynamic = destinationInstanceSample.IsDynamicType();// is IDictionary<String, Object>;
 
-            
+
             foreach (TSource sourceInstance in sourceEnumerable)
             {
                 if (!isSourceDynamic && !isDestinationDynamic)

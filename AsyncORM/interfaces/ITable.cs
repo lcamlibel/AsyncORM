@@ -9,6 +9,6 @@ namespace AsyncORM.interfaces
 
         Task UpdateAsync(dynamic entity, TableSetting tableSetting, string where = null);
 
-        Task DeleteAsync(TableSetting tableSetting, dynamic entity, string where = null);
+        Task DeleteAsync(dynamic entity, TableSetting tableSetting, string where = null);
     }
 }

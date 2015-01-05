@@ -36,7 +36,7 @@ namespace AsyncORM
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string insertStatement = await PrepareInsertStatementAsync(tableSetting, entity, isIdentity);
+            string insertStatement = PrepareInsertStatement(tableSetting, entity, isIdentity);
             IQueryAsync query = new DynamicQuery(_connectionString);
             if (isIdentity)
                 return await query.ExecuteScalarAsync(insertStatement, entity);
@@ -55,12 +55,12 @@ namespace AsyncORM
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string updateStatement = await PrepareUpdateStatementAsync(tableSetting, entity, where);
+            string updateStatement = PrepareUpdateStatement(tableSetting, entity, where);
             IQueryAsync query = new DynamicQuery(_connectionString);
             await query.ExecuteNonQueryAsync(updateStatement, entity);
         }
 
-        public async Task DeleteAsync(TableSetting tableSetting, dynamic entity, string where = null)
+        public async Task DeleteAsync(dynamic entity, TableSetting tableSetting, string where = null)
         {
             if (String.IsNullOrWhiteSpace(where) && !tableSetting.PrimaryKeys.Any())
             {
@@ -71,7 +71,7 @@ namespace AsyncORM
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string deleteStatement = await PrepareDeleteStatementAsync(tableSetting, where);
+            string deleteStatement = PrepareDeleteStatement(tableSetting, where);
             IQueryAsync query = new DynamicQuery(_connectionString);
             await query.ExecuteNonQueryAsync(deleteStatement, entity);
         }
@@ -88,7 +88,7 @@ namespace AsyncORM
             if (entity == null)
                 throw new ArgumentException("entity cannot be null.");
 
-            string insertStatement = await PrepareInsertStatementAsync(tableSetting, entity, isIdentity);
+            string insertStatement = await PrepareInsertStatement(tableSetting, entity, isIdentity);
             IQueryAsync query = new DynamicQuery(_connectionString);
             if (isIdentity)
                 return await query.ExecuteScalarAsync(insertStatement, entity);
@@ -96,7 +96,7 @@ namespace AsyncORM
             return default(T);
         }
 
-        private async Task<string> PrepareInsertStatementAsync(TableSetting tableSetting, dynamic entity,
+        private string PrepareInsertStatement(TableSetting tableSetting, dynamic entity,
             bool isIdentity)
         {
             IPrimaryKey primaryKey = null;
@@ -130,7 +130,7 @@ namespace AsyncORM
             return queryBuilder.Append(valueBuilder).ToString();
         }
 
-        private async Task<string> PrepareUpdateStatementAsync(TableSetting tableSetting, dynamic entity, string where)
+        private string PrepareUpdateStatement(TableSetting tableSetting, dynamic entity, string where)
         {
             PropertyInfo[] props = entity.GetType().GetProperties();
             var queryBuilder = new StringBuilder();
@@ -169,7 +169,7 @@ namespace AsyncORM
             return queryBuilder.ToString().TrimEnd('&');
         }
 
-        private async Task<string> PrepareDeleteStatementAsync(TableSetting tableSetting, string where)
+        private string PrepareDeleteStatement(TableSetting tableSetting, string where)
         {
             var queryBuilder = new StringBuilder();
             queryBuilder.AppendFormat("DELETE FROM {0} ", tableSetting.TableName);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Reflection;
@@ -8,20 +9,20 @@ namespace AsyncORM
     public abstract class BaseDatabaseAsync
     {
         protected readonly string ConnectionString;
-        protected  CommandType CommandType;
+        protected CommandType CommandType;
         protected BaseDatabaseAsync(string connectionString)
         {
-            var connBuilder = new SqlConnectionStringBuilder(connectionString) {AsynchronousProcessing = true};
+            var connBuilder = new SqlConnectionStringBuilder(connectionString) { AsynchronousProcessing = true };
             ConnectionString = connBuilder.ConnectionString;
         }
 
         protected BaseDatabaseAsync()
         {
             var connBuilder = new SqlConnectionStringBuilder(AsyncOrmConfig.ConnectionString)
-                                  {
-                                      AsynchronousProcessing
-                                          = true
-                                  };
+            {
+                AsynchronousProcessing
+                    = true
+            };
             ConnectionString = connBuilder.ConnectionString;
         }
 
@@ -72,18 +73,18 @@ namespace AsyncORM
             {
                 PropertyInfo item = props[index];
                 IDataParameter param;
-                if (item.PropertyType == typeof (IDataParameter))
+                if (item.PropertyType == typeof(IDataParameter))
                 {
-                    param = (IDataParameter) item.GetValue(dbParams, null);
+                    param = (IDataParameter)item.GetValue(dbParams, null);
                 }
                 else
                 {
                     param = new SqlParameter
-                                {
-                                    ParameterName = string.Concat("@", item.Name),
-                                    Value = item.GetValue(dbParams, null),
-                                    Direction = ParameterDirection.Input
-                                };
+                    {
+                        ParameterName = string.Concat("@", item.Name),
+                        Value = item.GetValue(dbParams, null) ?? DBNull.Value,
+                        Direction = ParameterDirection.Input
+                    };
                 }
                 if (param != null)
                     comm.Parameters.Add(param);
@@ -103,11 +104,11 @@ namespace AsyncORM
                 else
                 {
                     param = new SqlParameter
-                                {
-                                    ParameterName = string.Concat("@", valuepair.Key),
-                                    Value = valuepair.Value,
-                                    Direction = ParameterDirection.Input
-                                };
+                    {
+                        ParameterName = string.Concat("@", valuepair.Key),
+                        Value = valuepair.Value ?? DBNull.Value,
+                        Direction = ParameterDirection.Input
+                    };
                 }
                 comm.Parameters.Add(param);
             }

@@ -7,21 +7,21 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 namespace AsyncORM.Extensions
 {
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
 
-        internal static bool IsAnonymousType(this Type type)
+        public static bool IsAnonymousType(this Type type)
         {
             bool hasCompilerGeneratedAttribute = type.GetCustomAttributes(typeof(CompilerGeneratedAttribute), false).Count() > 0;
             bool nameContainsAnonymousType = type.FullName.Contains("AnonymousType");
             return hasCompilerGeneratedAttribute && nameContainsAnonymousType;
         }
-        internal static bool IsDynamicType(this object type)
+        public static bool IsDynamicType(this object type)
         {
             return type is IDynamicMetaObjectProvider || type is IDictionary<string, Object>;
         }
 
-        internal static Func<object, object> BuildGetAccessor(MethodInfo method)
+        public static Func<object, object> BuildGetAccessor(MethodInfo method)
         {
             ParameterExpression obj = Expression.Parameter(typeof(object), "o");
 
@@ -33,7 +33,7 @@ namespace AsyncORM.Extensions
             return expr.Compile();
         }
 
-        internal static Action<object, object> BuildSetAccessor(MethodInfo method)
+        public static Action<object, object> BuildSetAccessor(MethodInfo method)
         {
             ParameterExpression obj = Expression.Parameter(typeof(object), "o");
             ParameterExpression value = Expression.Parameter(typeof(object));
@@ -45,7 +45,7 @@ namespace AsyncORM.Extensions
 
             return expr.Compile();
         }
-        internal static AsyncColumnMapAttribute GetAttribute(MemberInfo memberInfo, bool isDynamic)
+        public static AsyncColumnMapAttribute GetAttribute(MemberInfo memberInfo, bool isDynamic)
         {
             if (isDynamic) return null;
             AsyncColumnMapAttribute attr;
@@ -61,7 +61,7 @@ namespace AsyncORM.Extensions
 
             return attr;
         }
-        internal static IEnumerable<PropertyInfo> GetProperties(bool isDynamic, Type type, object instance)
+        public static IEnumerable<PropertyInfo> GetProperties(bool isDynamic, Type type, object instance)
         {
             IEnumerable<PropertyInfo> properties;
             if (AsyncOrmConfig.EnableParameterCache && !isDynamic)
@@ -77,7 +77,7 @@ namespace AsyncORM.Extensions
             return properties;
         }
 
-        internal static TResult MapObjectToObject<TSource, TResult>(TSource sourceInstance,
+        public static TResult MapObjectToObject<TSource, TResult>(TSource sourceInstance,
                                                                    IEnumerable<PropertyInfo> sourceProps,
                                                                    IEnumerable<PropertyInfo> destinationProps)
         {
@@ -98,7 +98,7 @@ namespace AsyncORM.Extensions
             return destinationInstance;
         }
 
-        internal static TResult MapDynamicToObject<TResult>(IEnumerable<KeyValuePair<string, object>> sourceProps,
+        public static TResult MapDynamicToObject<TResult>(IEnumerable<KeyValuePair<string, object>> sourceProps,
                                                            IEnumerable<PropertyInfo> destinationProps)
         {
             var destinationInstance = Activator.CreateInstance<TResult>();
@@ -116,8 +116,27 @@ namespace AsyncORM.Extensions
             }
             return destinationInstance;
         }
+        public static TResult MapDynamicToObject<TResult>(ExpandoObject expandoObject)
+        {
+            IEnumerable<KeyValuePair<string, object>> sourceProps = expandoObject as IDictionary<string, object>;
 
-        internal static dynamic MapObjectToDynamic<TSource>(TSource sourceInstance, IEnumerable<PropertyInfo> sourceProps)
+            var destinationInstance = Activator.CreateInstance<TResult>();
+            var destinationProps = typeof(TResult).GetProperties();
+            foreach (var sourceProp in sourceProps)
+            {
+                foreach (PropertyInfo destinationProp in destinationProps)
+                    if ((sourceProp.Key.Equals(destinationProp.Name, StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        Action<object, object> setAccessor =
+                            ReflectionHelper.BuildSetAccessor(destinationProp.GetSetMethod());
+
+                        setAccessor(destinationInstance, sourceProp.Value);
+                        break;
+                    }
+            }
+            return destinationInstance;
+        }
+        public static dynamic MapObjectToDynamic<TSource>(TSource sourceInstance, IEnumerable<PropertyInfo> sourceProps)
         {
             dynamic destination = new ExpandoObject();
             var destinationInstance = destination as IDictionary<string, object>;

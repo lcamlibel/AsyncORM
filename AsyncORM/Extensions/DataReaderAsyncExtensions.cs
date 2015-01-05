@@ -36,13 +36,13 @@ namespace AsyncORM.Extensions
                     properties = instance.GetType().GetProperties();
                 }
                 foreach (PropertyInfo prop in
-                    properties.Where(prop => columnNames.Any(x=>x.Equals(prop.Name,StringComparison.InvariantCultureIgnoreCase)) && !Equals(dr[prop.Name], DBNull.Value)))
+                    properties.Where(prop => columnNames.Any(x => x.Equals(prop.Name, StringComparison.InvariantCultureIgnoreCase)) && !Equals(dr[prop.Name], DBNull.Value)))
                 {
                     ReflectionHelper.SetValue(instance, prop, dr[prop.Name]);
-                   // prop.SetValue(instance, dr[prop.Name]);
-//                    Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
-//                    setAccessor(instance, dr[prop.Name]);
-                   
+                    // prop.SetValue(instance, dr[prop.Name]);
+                    //                    Action<object, object> setAccessor = ReflectionHelper.BuildSetAccessor(prop.GetSetMethod());
+                    //                    setAccessor(instance, dr[prop.Name]);
+
                 }
                 generatedGenericObjects.Add(instance);
             }
@@ -53,8 +53,8 @@ namespace AsyncORM.Extensions
             var columnNames = new List<string>();
             for (int i = 0; i < dr.FieldCount; i++)
             {
-               columnNames.Add(dr.GetName(i));
-                   
+                columnNames.Add(dr.GetName(i));
+
             }
             return columnNames;
         }
